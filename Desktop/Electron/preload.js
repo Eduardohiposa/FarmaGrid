@@ -422,6 +422,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
   buscarProntuariosPaciente: (idPaciente, idMedico) => invocar('buscar-prontuarios-paciente', idPaciente, idMedico),
   atualizarSenha: (dados) => invocar('atualizar-senha', dados),
   verificarEmailRecuperacao: (email) => invocar('verificar-email-recuperacao', email),
+  validarCodigoRecuperacao: (dados) => invocar('validar-codigo-recuperacao', dados),
   redefinirSenha: (dados) => invocar('redefinir-senha', dados),
   cadastrarReceitaControlada: (dados) => invocar('cadastrar-receita-controlada', dados),
   buscarDadosFarmacia: (idFarmacia) => invocar('buscar-dados-farmacia', idFarmacia),

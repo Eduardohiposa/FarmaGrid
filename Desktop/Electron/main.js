@@ -2019,6 +2019,22 @@ ipcMain.handle('verificar-email-recuperacao', async (event, email) => {
   }
 });
 
+ipcMain.handle('validar-codigo-recuperacao', async (event, dados) => {
+  try {
+    return await apiPost('/auth/recuperacao/validar-codigo', {
+      email: dados.email, codigo: dados.codigo
+    });
+  } catch (err) {
+    // Uma rota ausente ou bloqueada não significa que o código está errado.
+    if ([401, 403, 404, 405].includes(err.status)) {
+      return { sucesso: false, erro: 'A API não disponibilizou a validação do código (HTTP ' + err.status + '). Atualize a API no Render com a rota /auth/recuperacao/validar-codigo e solicite um novo código após a atualização.' };
+    }
+    if (err.status === 400) {
+      return { sucesso: false, erro: err.body?.message || 'Código inválido ou expirado. Confira o código ou solicite outro.' };
+    }
+    return { sucesso: false, erro: 'Não foi possível consultar a validação do código. Verifique a conexão e tente novamente.' };
+  }
+});
 ipcMain.handle('redefinir-senha', async (event, dados) => {
   try {
     const resultado = await apiPost('/auth/recuperacao/redefinir', {

@@ -262,6 +262,15 @@
     .form-inner.oculto {
       display: none;
     }
+    .codigo-digitos { display:flex; gap:8px; justify-content:center; margin:10px 0; }
+    .codigo-digitos input { width:44px; min-width:0; height:54px; border:1.5px solid #4ba94b; border-radius:10px; background:#f0f7f0; color:#355e3b; text-align:center; font-size:26px; font-weight:700; }
+    .codigo-digitos input:focus { outline:2px solid #355e3b; outline-offset:2px; }
+    .ajuda { font-size:12px; line-height:1.6; color:#355e3b; overflow-wrap:anywhere; }
+    .link-botao { border:0; background:transparent; color:#355e3b; text-decoration:underline; cursor:pointer; font-size:13px; padding:6px 0; }
+    button:disabled { opacity:0.6; cursor:wait; }
+    .legenda { margin-top:24px; font-size:19px; }
+    .etapas { color:#355e3b; font-size:12px; margin-top:12px; }
+    @media (max-width:600px) { .left-column { width:100%; margin:0; padding:16px; } .form-inner, .enviar { width:100%; max-width:320px; } }
   </style>
 </head>
 <body>
@@ -276,7 +285,7 @@
           </div>
           <div class="titulo">Esqueceu sua senha?</div>
           <p class="subtitulo">Não se preocupe. Nós podemos te ajudar!</p>
-          <div class="legenda">Informe o e-mail para o qual deseja redefinir sua senha.</div>
+          <p class="etapas" id="indicadorEtapa" aria-live="polite">Etapa 1 de 3 · E-mail</p><div class="legenda" id="instrucaoEtapa">Informe o e-mail para o qual deseja redefinir sua senha.</div>
         </div>
 
         <div class="form-inner" id="formEmail">
@@ -289,19 +298,29 @@
           </div>
         </div>
 
-        <div class="form-inner oculto" id="formNovaSenha">
+        <div class="form-inner oculto" id="formCodigo">
+          <p class="ajuda" id="destinoCodigo"></p>
           <div class="form-group">
-            <label for="codigo">Código recebido por e-mail:</label>
-            <div class="input-icon">
-              <input id="codigo" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="6" />
+            <label id="rotuloCodigo">Código recebido por e-mail</label>
+            <div class="codigo-digitos" role="group" aria-labelledby="rotuloCodigo">
+              <input type="text" inputmode="numeric" pattern="[0-9]" maxlength="6" autocomplete="one-time-code" aria-label="Dígito 1 de 6" />
+              <input type="text" inputmode="numeric" pattern="[0-9]" maxlength="6" autocomplete="off" aria-label="Dígito 2 de 6" />
+              <input type="text" inputmode="numeric" pattern="[0-9]" maxlength="6" autocomplete="off" aria-label="Dígito 3 de 6" />
+              <input type="text" inputmode="numeric" pattern="[0-9]" maxlength="6" autocomplete="off" aria-label="Dígito 4 de 6" />
+              <input type="text" inputmode="numeric" pattern="[0-9]" maxlength="6" autocomplete="off" aria-label="Dígito 5 de 6" />
+              <input type="text" inputmode="numeric" pattern="[0-9]" maxlength="6" autocomplete="off" aria-label="Dígito 6 de 6" />
             </div>
-            <p>O código expira em 10 minutos. Confira também a pasta de spam.</p>
-            <button type="button" id="btnReenviar">Solicitar outro código</button>
+            <p class="ajuda">O código expira em 10 minutos. Confira também a pasta de spam.</p>
+            <button type="button" class="link-botao" id="btnReenviar">Solicitar outro código</button>
+            <button type="button" class="link-botao" id="btnAlterarEmail">Alterar e-mail</button>
           </div>
+        </div>
+        <div class="form-inner oculto" id="formNovaSenha">
+          <p class="ajuda">Código confirmado! Crie uma senha com pelo menos 6 caracteres.</p>
           <div class="form-group">
             <label for="novaSenha">Nova Senha:</label>
             <div class="input-icon">
-              <input id="novaSenha" type="password" />
+              <input id="novaSenha" type="password" autocomplete="new-password" minlength="6" />
               <img src="cadeado.png" alt="Ícone de senha" onerror="this.style.display='none'" />
             </div>
           </div>
@@ -309,7 +328,7 @@
           <div class="form-group">
             <label for="confNovaSenha">Confirmar Nova Senha:</label>
             <div class="input-icon">
-              <input id="confNovaSenha" type="password" />
+              <input id="confNovaSenha" type="password" autocomplete="new-password" minlength="6" />
               <img src="cadeado.png" alt="Ícone de senha" onerror="this.style.display='none'" />
             </div>
           </div>
@@ -322,95 +341,145 @@
   </div>
 
 
-    <script>
+  <script>
     let emailRecuperacao = null;
-    let etapaAtual = 'email'; // 'email' | 'senha'
-
+    let codigoValidado = null;
+    let etapaAtual = 'email';
+    let ocupado = false;
     const btnEnviar = document.getElementById('btnEnviar');
-    const formEmail = document.getElementById('formEmail');
-    const formNovaSenha = document.getElementById('formNovaSenha');
-
+    const btnReenviar = document.getElementById('btnReenviar');
+    const btnAlterarEmail = document.getElementById('btnAlterarEmail');
+    const digitos = [...document.querySelectorAll('.codigo-digitos input')];
+    const etapas = {
+      email: ['formEmail', 'Etapa 1 de 3 · E-mail', 'Informe o e-mail para o qual deseja redefinir sua senha.', 'Enviar código'],
+      codigo: ['formCodigo', 'Etapa 2 de 3 · Código', 'Digite o código que enviamos para você.', 'Validar código'],
+      senha: ['formNovaSenha', 'Etapa 3 de 3 · Nova senha', 'Escolha sua nova senha.', 'Redefinir senha']
+    };
+    function mudarEtapa(etapa) {
+      etapaAtual = etapa;
+      Object.values(etapas).forEach(([id]) => document.getElementById(id).classList.add('oculto'));
+      const [id, indicador, instrucao, botao] = etapas[etapa];
+      document.getElementById(id).classList.remove('oculto');
+      document.getElementById('indicadorEtapa').textContent = indicador;
+      document.getElementById('instrucaoEtapa').textContent = instrucao;
+      btnEnviar.textContent = botao;
+      document.querySelector('#' + id + ' input').focus();
+    }
+    function bloquear(valor) {
+      ocupado = valor;
+      [btnEnviar, btnReenviar, btnAlterarEmail, ...document.querySelectorAll('.form-inner input')]
+        .forEach(elemento => elemento.disabled = valor);
+    }
+    function preencherCodigo(texto, inicio) {
+      const numeros = texto.replace(/[^0-9]/g, '').slice(0, 6 - inicio);
+      for (let i = inicio; i < 6; i++) digitos[i].value = numeros[i - inicio] || '';
+      digitos[Math.min(inicio + numeros.length, 5)].focus();
+    }
+    digitos.forEach((input, indice) => {
+      input.addEventListener('focus', () => input.select());
+      input.addEventListener('input', () => preencherCodigo(input.value, indice));
+      input.addEventListener('paste', event => {
+        event.preventDefault();
+        const texto = event.clipboardData.getData('text');
+        preencherCodigo(texto, texto.replace(/[^0-9]/g, '').length >= 6 ? 0 : indice);
+      });
+      input.addEventListener('keydown', event => {
+        if (event.key === 'Backspace' && !input.value && indice > 0) {
+          event.preventDefault(); digitos[indice - 1].value = ''; digitos[indice - 1].focus();
+        }
+        if (event.key === 'ArrowLeft' && indice > 0) digitos[indice - 1].focus();
+        if (event.key === 'ArrowRight' && indice < 5) digitos[indice + 1].focus();
+      });
+    });
     btnEnviar.addEventListener('click', async () => {
-      btnEnviar.disabled = true;
-      try {
+      if (ocupado) return;
       if (etapaAtual === 'email') {
-        const email = document.getElementById('email').value.trim();
-
-        if (!email || !document.getElementById('email').checkValidity()) {
-          Swal.fire({ icon: 'warning', title: 'Preencha o e-mail.' });
-          return;
+        const input = document.getElementById('email');
+        if (!input.value.trim() || !input.checkValidity()) {
+          await Swal.fire({ icon:'warning', title:'Informe um e-mail válido.' }); return;
         }
-
-        const resultado = await window.electronAPI.verificarEmailRecuperacao(email);
-
-        if (!resultado.sucesso) {
-          Swal.fire({ icon: 'error', title: 'Não foi possível enviar o código.', text: resultado.erro || 'Tente novamente.' });
-          return;
-        }
-
-        emailRecuperacao = email;
-        await Swal.fire({ icon: 'info', title: 'Confira seu e-mail', text: resultado.mensagem });
-
-        formEmail.classList.add('oculto');
-        formNovaSenha.classList.remove('oculto');
-        btnEnviar.textContent = 'Redefinir Senha';
-        etapaAtual = 'senha';
-
-      } else if (etapaAtual === 'senha') {
-        const codigo = document.getElementById('codigo').value.trim();
-        if (!/^[0-9]{6}$/.test(codigo)) {
-          await Swal.fire({ icon: 'warning', title: 'Informe o código de 6 dígitos recebido por e-mail.' });
-          return;
-        }
-        const novaSenha = document.getElementById('novaSenha').value;
-        const confNovaSenha = document.getElementById('confNovaSenha').value;
-
-        if (!novaSenha || !confNovaSenha) {
-          Swal.fire({ icon: 'warning', title: 'Preencha os dois campos de senha.' });
-          return;
-        }
-
-        if (novaSenha.length < 6) {
-          Swal.fire({ icon: 'warning', title: 'Senha muito curta.', text: 'Use ao menos 6 caracteres.' });
-          return;
-        }
-
-        if (novaSenha !== confNovaSenha) {
-          Swal.fire({ icon: 'error', title: 'As senhas não coincidem.' });
-          return;
-        }
-
-        const resultado = await window.electronAPI.redefinirSenha({
-          email: emailRecuperacao, codigo,
-          novaSenha: novaSenha
-        });
-
-        if (!resultado.sucesso) {
-          Swal.fire({ icon: 'error', title: 'Erro ao redefinir senha.', text: resultado.erro || '' });
-          return;
-        }
-
-        await Swal.fire({ icon: 'success', title: 'Senha redefinida com sucesso!', text: 'Você já pode fazer login com a nova senha.' });
-        window.location.href = 'index.html';
       }
+      bloquear(true);
+      try {
+        if (etapaAtual === 'email') {
+          const input = document.getElementById('email');
+          const email = input.value.trim();
+          if (!email || !input.checkValidity()) {
+            await Swal.fire({ icon:'warning', title:'Informe um e-mail válido.' }); return;
+          }
+          const resultado = await window.electronAPI.verificarEmailRecuperacao(email);
+          if (!resultado.sucesso) {
+            await Swal.fire({ icon:'error', title:'Não foi possível enviar o código.', text:resultado.erro }); return;
+          }
+          emailRecuperacao = email;
+          codigoValidado = null;
+          digitos.forEach(input => input.value = '');
+          document.getElementById('destinoCodigo').textContent = 'Se o e-mail ' + email + ' estiver cadastrado, você receberá um código.';
+          mudarEtapa('codigo');
+        } else if (etapaAtual === 'codigo') {
+          const codigo = digitos.map(input => input.value).join('');
+          if (!/^[0-9]{6}$/.test(codigo)) {
+            await Swal.fire({ icon:'warning', title:'Preencha os seis números do código.' }); return;
+          }
+          const resultado = await window.electronAPI.validarCodigoRecuperacao({ email:emailRecuperacao, codigo });
+          if (!resultado.sucesso) {
+            await Swal.fire({ icon:'error', title:'Não foi possível validar o código.', text:resultado.erro }); return;
+          }
+          codigoValidado = codigo;
+          mudarEtapa('senha');
+        } else {
+          const novaSenha = document.getElementById('novaSenha').value;
+          const confirmacao = document.getElementById('confNovaSenha').value;
+          if (novaSenha.length < 6 || new TextEncoder().encode(novaSenha).length > 72) {
+            await Swal.fire({ icon:'warning', title:'Use uma senha de pelo menos 6 caracteres e até 72 bytes.' }); return;
+          }
+          if (novaSenha !== confirmacao) {
+            await Swal.fire({ icon:'warning', title:'As senhas não coincidem.' }); return;
+          }
+          const resultado = await window.electronAPI.redefinirSenha({ email:emailRecuperacao, codigo:codigoValidado, novaSenha });
+          if (!resultado.sucesso) {
+            await Swal.fire({ icon:'error', title:'Não foi possível redefinir a senha.', text:resultado.erro });
+            codigoValidado = null;
+            document.getElementById('novaSenha').value = '';
+            document.getElementById('confNovaSenha').value = '';
+            digitos.forEach(input => input.value = '');
+            mudarEtapa('codigo'); return;
+          }
+          await Swal.fire({ icon:'success', title:'Senha redefinida com sucesso!', text:'Você já pode fazer login com a nova senha.' });
+          window.location.href = 'index.html';
+        }
       } catch (erro) {
-        await Swal.fire({ icon: 'error', title: 'Não foi possível concluir a solicitação.', text: 'Tente novamente.' });
+        await Swal.fire({ icon:'error', title:'Não foi possível concluir a solicitação.', text:'Verifique sua conexão e tente novamente.' });
       } finally {
-        btnEnviar.disabled = false;
+        bloquear(false);
+        document.querySelector('#' + etapas[etapaAtual][0] + ' input').focus();
       }
     });
-    document.getElementById('btnReenviar').addEventListener('click', async (event) => {
-      const botao = event.currentTarget;
-      botao.disabled = true;
+    btnReenviar.addEventListener('click', async () => {
+      if (ocupado) return;
+      bloquear(true);
       try {
         const resultado = await window.electronAPI.verificarEmailRecuperacao(emailRecuperacao);
-        await Swal.fire({ icon: resultado.sucesso ? 'info' : 'error',
-          title: resultado.sucesso ? 'Confira seu e-mail' : 'Não foi possível reenviar',
-          text: resultado.mensagem || resultado.erro });
+        if (resultado.sucesso) {
+          codigoValidado = null;
+          digitos.forEach(input => input.value = '');
+        }
+        await Swal.fire({ icon:resultado.sucesso ? 'info' : 'error', title:resultado.sucesso ? 'Confira seu e-mail' : 'Não foi possível reenviar', text:resultado.mensagem || resultado.erro });
       } catch (erro) {
-        await Swal.fire({ icon: 'error', title: 'Não foi possível reenviar o código.' });
-      } finally { botao.disabled = false; }
+        await Swal.fire({ icon:'error', title:'Não foi possível reenviar o código.' });
+      } finally { bloquear(false); digitos[0].focus(); }
     });
+    btnAlterarEmail.addEventListener('click', () => {
+      if (ocupado) return;
+      emailRecuperacao = null;
+      codigoValidado = null;
+      digitos.forEach(input => input.value = '');
+      mudarEtapa('email');
+    });
+    document.querySelectorAll('.form-inner input').forEach(input => input.addEventListener('keydown', event => {
+      if (event.key === 'Enter') { event.preventDefault(); btnEnviar.click(); }
+    }));
+    mudarEtapa('email');
   </script>
 
 </body>
