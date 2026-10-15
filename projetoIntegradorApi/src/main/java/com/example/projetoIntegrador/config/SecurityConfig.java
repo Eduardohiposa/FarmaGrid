@@ -33,6 +33,7 @@ public class SecurityConfig {
                             "/auth/login",
                             "/auth/recuperacao/solicitar",
                             "/auth/recuperacao/redefinir",
+                            "/auth/recuperacao/validar-codigo",
                             "/auth/cadastro/paciente",
                             "/auth/cadastro/medico").permitAll()
                         .requestMatchers("/api/**").authenticated()

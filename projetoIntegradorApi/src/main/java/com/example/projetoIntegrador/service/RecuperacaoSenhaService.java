@@ -145,18 +145,25 @@ public class RecuperacaoSenhaService {
             """;
     }
 
-    public synchronized void redefinir(String valor, String codigo, String novaSenha) {
+    public synchronized void validarCodigo(String valor, String codigo) {
         String email = email(valor);
-        if (novaSenha == null || novaSenha.length() < 6 || novaSenha.getBytes(StandardCharsets.UTF_8).length > 72)
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Use uma senha de pelo menos 6 caracteres e até 72 bytes.");
         Desafio desafio = desafios.get(email);
         if (desafio == null || System.currentTimeMillis() - desafio.criado >= 600_000 || desafio.tentativas >= 5) {
             desafios.remove(email);
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Código inválido ou expirado. Solicite outro.");
         }
-        desafio.tentativas++;
-        if (codigo == null || !codigo.matches("[0-9]{6}") || !MessageDigest.isEqual(desafio.hash, hash(codigo)))
+        if (codigo == null || !codigo.matches("[0-9]{6}") || !MessageDigest.isEqual(desafio.hash, hash(codigo))) {
+            desafio.tentativas++;
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Código inválido ou expirado.");
+        }
+        if (logins.findAllByEmailIgnoreCase(email).isEmpty())
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Código inválido ou expirado.");
+    }
+    public synchronized void redefinir(String valor, String codigo, String novaSenha) {
+        String email = email(valor);
+        if (novaSenha == null || novaSenha.length() < 6 || novaSenha.getBytes(StandardCharsets.UTF_8).length > 72)
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Use uma senha de pelo menos 6 caracteres e até 72 bytes.");
+        validarCodigo(email, codigo);
         var contas = logins.findAllByEmailIgnoreCase(email);
         if (contas.isEmpty())
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Código inválido ou expirado.");
