@@ -1,9 +1,11 @@
+import '../../models/paciente_models.dart';
+import '../../widgets/carregamento.dart';
 import 'package:farmagrid/telas/telasPaciente/descontos.dart';
 import 'package:flutter/material.dart';
 import '../../services/paciente_service.dart';
 
 class ItemCarrinho {
-  final Map<String, dynamic> medicamento;
+  final ProdutoPaciente medicamento;
   int quantidade;
 
   ItemCarrinho({required this.medicamento, this.quantidade = 1});
@@ -29,11 +31,7 @@ class _TelaCarrinhoState extends State<TelaCarrinho> {
 
   double get _total {
     return widget.itens.fold(0.0, (soma, item) {
-      final preco = item.medicamento['precoFinal'] as String;
-      final valor =
-          double.tryParse(preco.replaceAll('R\$ ', '').replaceAll(',', '.')) ??
-          0.0;
-      return soma + valor * item.quantidade;
+      return soma + item.medicamento.preco * item.quantidade;
     });
   }
 
@@ -130,7 +128,7 @@ class _TelaCarrinhoState extends State<TelaCarrinho> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    med['nome'],
+                                    med.nome,
                                     style: const TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 13,
@@ -138,7 +136,7 @@ class _TelaCarrinhoState extends State<TelaCarrinho> {
                                   ),
                                   const SizedBox(height: 2),
                                   Text(
-                                    med['categoria'],
+                                    med.categoria,
                                     style: TextStyle(
                                       color: Colors.grey.shade500,
                                       fontSize: 11,
@@ -146,7 +144,7 @@ class _TelaCarrinhoState extends State<TelaCarrinho> {
                                   ),
                                   const SizedBox(height: 4),
                                   Text(
-                                    med['precoFinal'],
+                                    med.precoFormatado,
                                     style: const TextStyle(
                                       color: _teal2,
                                       fontWeight: FontWeight.bold,
@@ -298,7 +296,7 @@ class _TelaMedicamentosState extends State<TelaMedicamentos> {
   String _termoBusca = '';
 
   final List<ItemCarrinho> _carrinho = [];
-  List<Map<String, dynamic>> _produtosApi = const [];
+  List<ProdutoPaciente> _produtosApi = const [];
 
   @override
   void initState() {
@@ -306,39 +304,33 @@ class _TelaMedicamentosState extends State<TelaMedicamentos> {
     _carregarProdutos();
   }
 
+  bool _carregandoProdutos = true;
+  String? _erroProdutos;
   Future<void> _carregarProdutos() async {
+    setState(() {
+      _carregandoProdutos = true;
+      _erroProdutos = null;
+    });
     try {
       final produtos = await PacienteService.listarProdutos();
       if (!mounted) return;
       setState(
-        () => _produtosApi = produtos
-            .where((p) => p.quantidade > 0)
-            .map(
-              (p) => {
-                'id': p.id,
-                'nome': p.nome,
-                'categoria': p.categoria,
-                'precoOriginal':
-                    'R\$ ${p.preco.toStringAsFixed(2).replaceAll('.', ',')}',
-                'precoFinal':
-                    'R\$ ${p.preco.toStringAsFixed(2).replaceAll('.', ',')}',
-                'desconto': p.controlado ? 'Receita' : '',
-                'avaliacao': '—',
-                'distancia': 'Estoque: ${p.quantidade}',
-              },
-            )
-            .toList(),
+        () => _produtosApi = produtos.where((p) => p.quantidade > 0).toList(),
       );
-    } catch (_) {}
+    } catch (erro) {
+      if (mounted) setState(() => _erroProdutos = erro.toString());
+    } finally {
+      if (mounted) setState(() => _carregandoProdutos = false);
+    }
   }
 
   int get _totalItens =>
       _carrinho.fold(0, (soma, item) => soma + item.quantidade);
 
-  void _adicionarAoCarrinho(Map<String, dynamic> med) {
+  void _adicionarAoCarrinho(ProdutoPaciente med) {
     setState(() {
       final existente = _carrinho
-          .where((i) => i.medicamento['nome'] == med['nome'])
+          .where((i) => i.medicamento.id == med.id)
           .firstOrNull;
       if (existente != null) {
         existente.quantidade++;
@@ -356,7 +348,7 @@ class _TelaMedicamentosState extends State<TelaMedicamentos> {
             const SizedBox(width: 8),
             Expanded(
               child: Text(
-                '${med['nome']} adicionado ao carrinho',
+                '${med.nome} adicionado ao carrinho',
                 overflow: TextOverflow.ellipsis,
               ),
             ),
@@ -370,92 +362,15 @@ class _TelaMedicamentosState extends State<TelaMedicamentos> {
     );
   }
 
-  static const List<Map<String, dynamic>> _fallbackMedicamentos = [
-    {
-      'nome': 'Paracetamol 750mg',
-      'categoria': 'Analgésico',
-      'precoOriginal': 'R\$ 18,90',
-      'precoFinal': 'R\$ 12,90',
-      'desconto': '-30%',
-      'avaliacao': '4.8',
-      'distancia': '1.3 km',
-    },
-    {
-      'nome': 'Ibuprofeno 600mg',
-      'categoria': 'Anti-inflamatório',
-      'precoOriginal': 'R\$ 24,50',
-      'precoFinal': 'R\$ 17,90',
-      'desconto': '-27%',
-      'avaliacao': '4.6',
-      'distancia': '0.8 km',
-    },
-    {
-      'nome': 'Amoxicilina 500mg',
-      'categoria': 'Antibiótico',
-      'precoOriginal': 'R\$ 38,00',
-      'precoFinal': 'R\$ 29,90',
-      'desconto': '-21%',
-      'avaliacao': '4.7',
-      'distancia': '2.1 km',
-    },
-    {
-      'nome': 'Losartana 50mg',
-      'categoria': 'Anti-hipertensivo',
-      'precoOriginal': 'R\$ 32,00',
-      'precoFinal': 'R\$ 22,90',
-      'desconto': '-28%',
-      'avaliacao': '4.9',
-      'distancia': '1.5 km',
-    },
-    {
-      'nome': 'Omeprazol 20mg',
-      'categoria': 'Antiulceroso',
-      'precoOriginal': 'R\$ 28,00',
-      'precoFinal': 'R\$ 19,90',
-      'desconto': '-29%',
-      'avaliacao': '4.5',
-      'distancia': '0.5 km',
-    },
-    {
-      'nome': 'Metformina 850mg',
-      'categoria': 'Antidiabético',
-      'precoOriginal': 'R\$ 21,00',
-      'precoFinal': 'R\$ 14,90',
-      'desconto': '-29%',
-      'avaliacao': '4.7',
-      'distancia': '3.0 km',
-    },
-    {
-      'nome': 'Dipirona 500mg',
-      'categoria': 'Analgésico',
-      'precoOriginal': 'R\$ 14,00',
-      'precoFinal': 'R\$ 9,90',
-      'desconto': '-29%',
-      'avaliacao': '4.6',
-      'distancia': '1.0 km',
-    },
-    {
-      'nome': 'Atorvastatina 20mg',
-      'categoria': 'Hipolipemiante',
-      'precoOriginal': 'R\$ 45,00',
-      'precoFinal': 'R\$ 32,90',
-      'desconto': '-27%',
-      'avaliacao': '4.8',
-      'distancia': '2.5 km',
-    },
-  ];
-
-  List<Map<String, dynamic>> get _medicamentosFiltrados {
-    final todosMedicamentos = _produtosApi.isEmpty
-        ? _fallbackMedicamentos
-        : _produtosApi;
+  List<ProdutoPaciente> get _medicamentosFiltrados {
+    final todosMedicamentos = _produtosApi;
     if (_termoBusca.isEmpty) return todosMedicamentos;
     final termo = _termoBusca.toLowerCase();
     return todosMedicamentos
         .where(
           (m) =>
-              (m['nome'] as String).toLowerCase().contains(termo) ||
-              (m['categoria'] as String).toLowerCase().contains(termo),
+              m.nome.toLowerCase().contains(termo) ||
+              m.categoria.toLowerCase().contains(termo),
         )
         .toList();
   }
@@ -475,7 +390,19 @@ class _TelaMedicamentosState extends State<TelaMedicamentos> {
         children: [
           _cabecalho(),
           Expanded(
-            child: lista.isEmpty
+            child: _carregandoProdutos
+                ? const CartaoCarregamento(mensagem: 'Buscando medicamentos...')
+                : _erroProdutos != null
+                ? Center(
+                    child: TextButton.icon(
+                      onPressed: _carregarProdutos,
+                      icon: const Icon(Icons.refresh),
+                      label: const Text(
+                        'Não foi possível carregar. Tentar novamente',
+                      ),
+                    ),
+                  )
+                : lista.isEmpty
                 ? _semResultados()
                 : SingleChildScrollView(
                     padding: const EdgeInsets.all(20),
@@ -514,18 +441,16 @@ class _TelaMedicamentosState extends State<TelaMedicamentos> {
                           ],
                         ),
                         const SizedBox(height: 20),
-                        GridView.builder(
+                        ListView.builder(
                           shrinkWrap: true,
                           physics: const NeverScrollableScrollPhysics(),
-                          gridDelegate:
-                              const SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 2,
-                                childAspectRatio: 0.68,
-                                crossAxisSpacing: 15,
-                                mainAxisSpacing: 15,
-                              ),
                           itemCount: lista.length,
-                          itemBuilder: (_, i) => _cardMedicamento(lista[i]),
+                          itemBuilder: (context, index) {
+                            return Padding(
+                              padding: const EdgeInsets.only(bottom: 16),
+                              child: _cardMedicamento(lista[index]),
+                            );
+                          },
                         ),
                       ],
                     ),
@@ -625,9 +550,9 @@ class _TelaMedicamentosState extends State<TelaMedicamentos> {
     );
   }
 
-  Widget _cardMedicamento(Map<String, dynamic> med) {
+  Widget _cardMedicamento(ProdutoPaciente med) {
     final noCarrinho = _carrinho
-        .where((i) => i.medicamento['nome'] == med['nome'])
+        .where((i) => i.medicamento.id == med.id)
         .firstOrNull;
     final qtdNoCarrinho = noCarrinho?.quantidade ?? 0;
 
@@ -663,28 +588,29 @@ class _TelaMedicamentosState extends State<TelaMedicamentos> {
                   ),
                 ),
               ),
-              Positioned(
-                right: 8,
-                top: 8,
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: _teal2,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Text(
-                    med['desconto'],
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold,
+              if (med.controlado)
+                Positioned(
+                  right: 8,
+                  top: 8,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: _teal2,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Text(
+                      (med.controlado ? 'Receita' : ''),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ),
-              ),
             ],
           ),
           Padding(
@@ -693,7 +619,7 @@ class _TelaMedicamentosState extends State<TelaMedicamentos> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  med['nome'],
+                  med.nome,
                   style: const TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 13,
@@ -703,7 +629,7 @@ class _TelaMedicamentosState extends State<TelaMedicamentos> {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  med['categoria'],
+                  med.categoria,
                   style: TextStyle(color: Colors.grey.shade500, fontSize: 11),
                 ),
                 const SizedBox(height: 4),
@@ -712,7 +638,7 @@ class _TelaMedicamentosState extends State<TelaMedicamentos> {
                     const Icon(Icons.star, color: Color(0xFFF3CD23), size: 14),
                     const SizedBox(width: 4),
                     Text(
-                      med['avaliacao'],
+                      '—',
                       style: const TextStyle(
                         color: Color(0xFF36515F),
                         fontSize: 12,
@@ -726,7 +652,7 @@ class _TelaMedicamentosState extends State<TelaMedicamentos> {
                     ),
                     const SizedBox(width: 2),
                     Text(
-                      med['distancia'],
+                      "Estoque: ${med.quantidade}",
                       style: const TextStyle(
                         color: Color(0xFF36515F),
                         fontSize: 12,
@@ -736,15 +662,7 @@ class _TelaMedicamentosState extends State<TelaMedicamentos> {
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  med['precoOriginal'],
-                  style: const TextStyle(
-                    decoration: TextDecoration.lineThrough,
-                    fontSize: 11,
-                    color: Colors.grey,
-                  ),
-                ),
-                Text(
-                  med['precoFinal'],
+                  med.precoFormatado,
                   style: const TextStyle(
                     color: _teal2,
                     fontWeight: FontWeight.bold,

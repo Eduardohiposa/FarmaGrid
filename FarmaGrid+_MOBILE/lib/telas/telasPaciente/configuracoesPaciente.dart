@@ -1,3 +1,4 @@
+import '../../models/lista_models.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:farmagrid/app_theme.dart';
@@ -71,10 +72,7 @@ class _TelaConfiguracoesPacienteState extends State<TelaConfiguracoesPaciente> {
   String _planoAssinatura = 'Plano Básico';
   String _tipoAssinatura = 'MENSAL';
 
-  final List<Map<String, String>> _dependentes = [
-    {'nome': 'Maria Silva', 'parentesco': 'Cônjuge', 'cpf': '***.***.***-10'},
-    {'nome': 'João Silva Jr.', 'parentesco': 'Filho', 'cpf': '***.***.***-22'},
-  ];
+  final List<DependentePaciente> _dependentes = [];
 
   final List<Map<String, dynamic>> _abas = [
     {'titulo': 'Perfil pessoal', 'icone': Icons.person_outline},
@@ -288,12 +286,7 @@ class _TelaConfiguracoesPacienteState extends State<TelaConfiguracoesPaciente> {
         ..clear()
         ..addAll(
           (resultados[1] as List<Map<String, dynamic>>).map(
-            (d) => {
-              'id': '${d['id'] ?? ''}',
-              'nome': '${d['nome'] ?? ''}',
-              'parentesco': '${d['parentesco'] ?? ''}',
-              'cpf': '${d['cpf'] ?? ''}',
-            },
+            (d) => DependentePaciente.fromJson(d),
           ),
         );
       _alergias
@@ -311,126 +304,150 @@ class _TelaConfiguracoesPacienteState extends State<TelaConfiguracoesPaciente> {
   }
 
   Future<void> _salvarDados() async {
-    await PerfilService.salvarPerfil({
-      'nome': [
-        _nomeCtrl.text.trim(),
-        _sobrenomeCtrl.text.trim(),
-      ].where((v) => v.isNotEmpty).join(' '),
-      'email': _emailCtrl.text.trim(),
-      'cpf': _perfil['cpf'],
-      'dataNascimento': _nascimentoCtrl.text.trim(),
-      'sexo': _perfil['sexo'],
-      'telefone': _telefoneCtrl.text.trim(),
-      'rua': _ruaCtrl.text.trim(),
-      'numCasa': int.tryParse(_numeroCtrl.text),
-      'bairro': _bairroCtrl.text.trim(),
-      'cidade': _cidadeCtrl.text.trim(),
-      'estado': _perfil['estado'],
-      'cep': _cepCtrl.text.trim(),
-      'tipoSanguineo': _tipoSanguineo,
-      'planoSaude': _planoCtrl.text.trim(),
-      'contatoEmergenciaNome': _contatoEmerNomeCtrl.text.trim(),
-      'contatoEmergenciaTelefone': _contatoEmerTelCtrl.text.trim(),
-    });
-    if (mounted) setState(() => _modoEdicao = false);
-    _snack('Informações salvas no banco de dados!');
+    try {
+      await PerfilService.salvarPerfil({
+        'nome': [
+          _nomeCtrl.text.trim(),
+          _sobrenomeCtrl.text.trim(),
+        ].where((v) => v.isNotEmpty).join(' '),
+        'email': _emailCtrl.text.trim(),
+        'cpf': _perfil['cpf'],
+        'dataNascimento': _nascimentoCtrl.text.trim(),
+        'sexo': _perfil['sexo'],
+        'telefone': _telefoneCtrl.text.trim(),
+        'rua': _ruaCtrl.text.trim(),
+        'numCasa': int.tryParse(_numeroCtrl.text),
+        'bairro': _bairroCtrl.text.trim(),
+        'cidade': _cidadeCtrl.text.trim(),
+        'estado': _perfil['estado'],
+        'cep': _cepCtrl.text.trim(),
+        'tipoSanguineo': _tipoSanguineo,
+        'planoSaude': _planoCtrl.text.trim(),
+        'contatoEmergenciaNome': _contatoEmerNomeCtrl.text.trim(),
+        'contatoEmergenciaTelefone': _contatoEmerTelCtrl.text.trim(),
+      });
+      if (mounted) setState(() => _modoEdicao = false);
+      _snack('Informações salvas no banco de dados!');
+    } catch (erro) {
+      if (mounted) _snack('Não foi possível concluir: $erro');
+    }
   }
 
   Future<void> _selecionarFoto() async {
-    final arquivo = await ImagePicker().pickImage(
-      source: ImageSource.gallery,
-      imageQuality: 82,
-    );
-    if (arquivo == null) return;
-    final bytes = await arquivo.readAsBytes();
-    await PerfilService.salvarFoto(bytes);
-    if (mounted) setState(() => _foto = bytes);
-    _snack('Foto atualizada no banco de dados!');
+    try {
+      final arquivo = await ImagePicker().pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 82,
+      );
+      if (arquivo == null) return;
+      final bytes = await arquivo.readAsBytes();
+      await PerfilService.salvarFoto(bytes);
+      if (mounted) setState(() => _foto = bytes);
+      _snack('Foto atualizada no banco de dados!');
+    } catch (erro) {
+      if (mounted) _snack('Não foi possível concluir: $erro');
+    }
   }
 
   Future<void> _alterarSenha() async {
-    if (_novaSenhaCtrl.text != _confirmSenhaCtrl.text) {
-      _snack('As novas senhas não coincidem.');
-      return;
+    try {
+      if (_novaSenhaCtrl.text != _confirmSenhaCtrl.text) {
+        _snack('As novas senhas não coincidem.');
+        return;
+      }
+      await PerfilService.alterarSenha(
+        _senhaAtualCtrl.text,
+        _novaSenhaCtrl.text,
+      );
+      _senhaAtualCtrl.clear();
+      _novaSenhaCtrl.clear();
+      _confirmSenhaCtrl.clear();
+      _snack('Senha atualizada no banco de dados!');
+    } catch (erro) {
+      if (mounted) _snack('Não foi possível concluir: $erro');
     }
-    await PerfilService.alterarSenha(_senhaAtualCtrl.text, _novaSenhaCtrl.text);
-    _senhaAtualCtrl.clear();
-    _novaSenhaCtrl.clear();
-    _confirmSenhaCtrl.clear();
-    _snack('Senha atualizada no banco de dados!');
   }
 
   Future<bool> _salvarCartao() async {
-    final numero = _numeroCartaoCtrl.text.replaceAll(RegExp(r'[^0-9]'), '');
-    if (numero.length < 13 ||
-        _titularCtrl.text.trim().isEmpty ||
-        _validadeCtrl.text.trim().length != 5 ||
-        !RegExp(r'^\d{3,4}$').hasMatch(_cvvCtrl.text)) {
-      _snack('Preencha número, titular, validade e CVV corretamente.');
+    try {
+      final numero = _numeroCartaoCtrl.text.replaceAll(RegExp(r'[^0-9]'), '');
+      if (numero.length < 13 ||
+          _titularCtrl.text.trim().isEmpty ||
+          _validadeCtrl.text.trim().length != 5 ||
+          !RegExp(r'^\d{3,4}$').hasMatch(_cvvCtrl.text)) {
+        _snack('Preencha número, titular, validade e CVV corretamente.');
+        return false;
+      }
+      await PacienteService.adicionarCartao({
+        'numero': numero,
+        'nomeTitular': _titularCtrl.text.trim(),
+        'validade': _validadeCtrl.text.trim(),
+        'bandeira': _bandeiraCartao,
+      });
+      _numeroCartaoCtrl.clear();
+      _titularCtrl.clear();
+      _validadeCtrl.clear();
+      _cvvCtrl.clear();
+      _cartoes = await PacienteService.listarCartoes();
+      if (mounted) setState(() {});
+      _snack('Cartão salvo no banco de dados!');
+      return true;
+    } catch (erro) {
+      if (mounted) _snack('Não foi possível concluir: $erro');
       return false;
     }
-    await PacienteService.adicionarCartao({
-      'numero': numero,
-      'nomeTitular': _titularCtrl.text.trim(),
-      'validade': _validadeCtrl.text.trim(),
-      'bandeira': _bandeiraCartao,
-    });
-    _numeroCartaoCtrl.clear();
-    _titularCtrl.clear();
-    _validadeCtrl.clear();
-    _cvvCtrl.clear();
-    _cartoes = await PacienteService.listarCartoes();
-    if (mounted) setState(() {});
-    _snack('Cartão salvo no banco de dados!');
-    return true;
   }
 
   Future<void> _alterarPlano(bool premium, {String tipo = 'MENSAL'}) async {
-    if (premium && _cartoes.isEmpty) {
-      _snack('Cadastre um cartão abaixo antes de assinar o Premium.');
-      return;
-    }
-    final numero = premium ? '${_cartoes.last['numero'] ?? ''}' : '';
-    final finalCartao = numero.length >= 4
-        ? numero.substring(numero.length - 4)
-        : numero;
-    const precos = {
-      'MENSAL': 'R\$ 19,90/mês',
-      'ANUAL': 'R\$ 149,90/ano',
-      'PERMANENTE': 'R\$ 199,00 (pagamento único)',
-    };
-    final confirmar = await showDialog<bool>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(premium ? 'Confirmar assinatura' : 'Cancelar Premium'),
-        content: Text(
-          premium
-              ? 'Assinar o Clube FarmaGrid+ por ${precos[tipo]} usando o cartão final $finalCartao?'
-              : 'Você perderá os benefícios Premium ao confirmar o cancelamento.',
+    try {
+      if (premium && _cartoes.isEmpty) {
+        _snack('Cadastre um cartão abaixo antes de assinar o Premium.');
+        return;
+      }
+      final numero = premium ? '${_cartoes.last['numero'] ?? ''}' : '';
+      final finalCartao = numero.length >= 4
+          ? numero.substring(numero.length - 4)
+          : numero;
+      const precos = {
+        'MENSAL': 'R\$ 19,90/mês',
+        'ANUAL': 'R\$ 149,90/ano',
+        'PERMANENTE': 'R\$ 199,00 (pagamento único)',
+      };
+      final confirmar = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: Text(premium ? 'Confirmar assinatura' : 'Cancelar Premium'),
+          content: Text(
+            premium
+                ? 'Assinar o Clube FarmaGrid+ por ${precos[tipo]} usando o cartão final $finalCartao?'
+                : 'Você perderá os benefícios Premium ao confirmar o cancelamento.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('Voltar'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              child: const Text('Confirmar'),
+            ),
+          ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Voltar'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Confirmar'),
-          ),
-        ],
-      ),
-    );
-    if (confirmar != true) return;
-    await PacienteService.alterarAssinatura(premium, tipo: tipo);
-    final atualizado = await PerfilService.carregar(atualizar: true);
-    if (mounted) {
-      setState(() {
-        _perfil = atualizado;
-        _planoAssinatura = premium ? 'Clube FarmaGrid+' : 'Plano Básico';
-        _tipoAssinatura = premium ? tipo : 'MENSAL';
-      });
+      );
+      if (confirmar != true) return;
+      await PacienteService.alterarAssinatura(premium, tipo: tipo);
+      final atualizado = await PerfilService.carregar(atualizar: true);
+      if (mounted) {
+        setState(() {
+          _perfil = atualizado;
+          _planoAssinatura = premium ? 'Clube FarmaGrid+' : 'Plano Básico';
+          _tipoAssinatura = premium ? tipo : 'MENSAL';
+        });
+      }
+      _snack(premium ? 'Assinatura Premium ativada!' : 'Assinatura cancelada.');
+    } catch (erro) {
+      if (mounted) _snack('Não foi possível concluir: $erro');
     }
-    _snack(premium ? 'Assinatura Premium ativada!' : 'Assinatura cancelada.');
   }
 
   @override
@@ -688,7 +705,6 @@ class _TelaConfiguracoesPacienteState extends State<TelaConfiguracoesPaciente> {
         if (_modoEdicao) {
           _salvarDados();
           return;
-          _snack('Informações salvas com sucesso!');
         }
         setState(() => _modoEdicao = !_modoEdicao);
       },
@@ -1294,66 +1310,77 @@ class _TelaConfiguracoesPacienteState extends State<TelaConfiguracoesPaciente> {
             subtitulo: '${_dependentes.length} dependente(s) no plano',
             child: Column(
               children: [
-                ..._dependentes.asMap().entries.map((entry) {
-                  final i = entry.key;
-                  final dep = entry.value;
-                  return Container(
-                    margin: const EdgeInsets.only(bottom: 10),
-                    padding: const EdgeInsets.all(14),
-                    decoration: BoxDecoration(
-                      color: _corCampo,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: _corBordaCampo),
-                    ),
-                    child: Row(
-                      children: [
-                        CircleAvatar(
-                          radius: 22,
-                          backgroundColor: _verde.withValues(alpha: 0.12),
-                          child: const Icon(
-                            Icons.person,
-                            color: _verde,
-                            size: 22,
+                ListView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: _dependentes.length,
+                  itemBuilder: (context, index) {
+                    final dep = _dependentes[index];
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: 10),
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: _corCampo,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: _corBordaCampo),
+                      ),
+                      child: Row(
+                        children: [
+                          CircleAvatar(
+                            radius: 22,
+                            backgroundColor: _verde.withValues(alpha: 0.12),
+                            child: const Icon(
+                              Icons.person,
+                              color: _verde,
+                              size: 22,
+                            ),
                           ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                dep['nome']!,
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 14,
-                                  color: _corTexto,
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  dep.nome,
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 14,
+                                    color: _corTexto,
+                                  ),
                                 ),
-                              ),
-                              Text(
-                                '${dep['parentesco']} · CPF: ${dep['cpf']}',
-                                style: TextStyle(
-                                  color: _corSubtexto,
-                                  fontSize: 12,
+                                Text(
+                                  '${dep.parentesco} · CPF: ${dep.cpf}',
+                                  style: TextStyle(
+                                    color: _corSubtexto,
+                                    fontSize: 12,
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
-                        ),
-                        IconButton(
-                          icon: const Icon(
-                            Icons.delete_outline,
-                            color: Colors.red,
-                            size: 20,
+                          IconButton(
+                            icon: const Icon(
+                              Icons.delete_outline,
+                              color: Colors.red,
+                              size: 20,
+                            ),
+                            onPressed: () async {
+                              try {
+                                await PacienteService.removerDependente(dep.id);
+                                if (!mounted) return;
+                                setState(() => _dependentes.remove(dep));
+                                _snack('Dependente removido.');
+                              } catch (erro) {
+                                if (mounted)
+                                  _snack('Não foi possível remover: $erro');
+                              }
+                            },
                           ),
-                          onPressed: () {
-                            setState(() => _dependentes.removeAt(i));
-                            _snack('Dependente removido.');
-                          },
-                        ),
-                      ],
-                    ),
-                  );
-                }),
+                        ],
+                      ),
+                    );
+                  },
+                ),
                 const SizedBox(height: 4),
                 SizedBox(
                   width: double.infinity,
@@ -1585,22 +1612,27 @@ class _TelaConfiguracoesPacienteState extends State<TelaConfiguracoesPaciente> {
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
-              onPressed: () {
+              onPressed: () async {
                 final nome = nomeCtrl.text.trim();
                 final cpf = cpfCtrl.text.trim();
                 if (nome.isEmpty || cpf.isEmpty) {
                   _snack('Preencha nome e CPF para continuar.');
                   return;
                 }
-                setState(() {
-                  _dependentes.add({
+                try {
+                  await PacienteService.adicionarDependente({
                     'nome': nome,
                     'parentesco': parentescoSel,
                     'cpf': cpf,
                   });
-                });
-                Navigator.pop(ctx);
-                _snack('Dependente "$nome" adicionado com sucesso!');
+                  if (!mounted || !ctx.mounted) return;
+                  Navigator.pop(ctx);
+                  await _carregarDados();
+                  if (mounted)
+                    _snack('Dependente "$nome" adicionado com sucesso!');
+                } catch (erro) {
+                  if (mounted) _snack('Não foi possível adicionar: $erro');
+                }
               },
               child: const Text(
                 'Adicionar',
@@ -2138,6 +2170,7 @@ class _TelaConfiguracoesPacienteState extends State<TelaConfiguracoesPaciente> {
   }
 
   void _snack(String msg) {
+    if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(msg),

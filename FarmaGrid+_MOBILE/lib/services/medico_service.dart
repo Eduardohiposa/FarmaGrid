@@ -1,20 +1,8 @@
-import 'dart:convert';
-
-import 'package:http/http.dart' as http;
-
-import '../config/api_config.dart';
+import 'api_service.dart';
 import '../models/medico_models.dart';
 import 'auth_service.dart';
 
 class MedicoService {
-  static Map<String, String> get _headers {
-    final token = AuthService.usuarioLogado?.token;
-    return {
-      'Content-Type': 'application/json',
-      if (token != null && token.isNotEmpty) 'Authorization': 'Bearer $token',
-    };
-  }
-
   static int get _idMedico {
     final id = AuthService.usuarioLogado?.idMedico;
     if (id == null) {
@@ -107,58 +95,13 @@ class MedicoService {
     observacoes: observacoes,
   );
 
-  static Future<dynamic> _get(String path) async {
-    try {
-      return _decode(
-        await http.get(
-          Uri.parse('${ApiConfig.baseUrl}$path'),
-          headers: _headers,
-        ),
-      );
-    } on ApiException {
-      rethrow;
-    } catch (_) {
-      throw ApiException(
-        'Não foi possível conectar à API em ${ApiConfig.baseUrl}.',
-      );
-    }
-  }
-
+  static Future<dynamic> _get(String path) =>
+      ApiService.requisitar('GET', path);
   static Future<dynamic> _send(
     String method,
     String path,
     Map<String, dynamic> body,
-  ) async {
-    try {
-      final request =
-          http.Request(method, Uri.parse('${ApiConfig.baseUrl}$path'))
-            ..headers.addAll(_headers)
-            ..body = jsonEncode(body);
-      return _decode(await http.Response.fromStream(await request.send()));
-    } on ApiException {
-      rethrow;
-    } catch (_) {
-      throw ApiException(
-        'Não foi possível conectar à API em ${ApiConfig.baseUrl}.',
-      );
-    }
-  }
-
-  static dynamic _decode(http.Response response) {
-    dynamic body;
-    try {
-      body = response.body.isEmpty ? null : jsonDecode(response.body);
-    } catch (_) {
-      body = response.body;
-    }
-    if (response.statusCode < 200 || response.statusCode >= 300) {
-      final message = body is Map
-          ? body['message'] ?? body['mensagem'] ?? body['error']
-          : body;
-      throw ApiException('${message ?? 'Erro HTTP ${response.statusCode}'}');
-    }
-    return body;
-  }
+  ) => ApiService.requisitar(method, path, body: body);
 
   static List<Map<String, dynamic>> _lista(dynamic json) =>
       (json as List? ?? const [])

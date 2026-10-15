@@ -122,56 +122,75 @@ class _TelaConfiguracoesMedicoState extends State<TelaConfiguracoesMedico> {
   }
 
   Future<void> _salvarPerfil() async {
-    await PerfilService.salvarPerfil({
-      'nome': _nomeCtrl.text.trim(),
-      'sobrenome': null,
-      'email': _emailCtrl.text.trim(),
-      'telefone': _telefoneCtrl.text.trim(),
-      'dataNascimento': _nascimentoCtrl.text.trim(),
-      'endereco': _perfil['endereco'],
-    });
-    if (mounted) setState(() => _editandoPerfil = false);
-    _snack('Perfil atualizado com sucesso!');
+    try {
+      await PerfilService.salvarPerfil({
+        'nome': _nomeCtrl.text.trim(),
+        'sobrenome': null,
+        'email': _emailCtrl.text.trim(),
+        'telefone': _telefoneCtrl.text.trim(),
+        'dataNascimento': _nascimentoCtrl.text.trim(),
+        'endereco': _perfil['endereco'],
+      });
+      if (mounted) setState(() => _editandoPerfil = false);
+      _snack('Perfil atualizado com sucesso!');
+    } catch (erro) {
+      if (mounted) _snack('Não foi possível concluir: $erro');
+    }
   }
 
   Future<void> _salvarProfissional() async {
-    await PerfilService.salvarProfissional({
-      'crm': _crmCtrl.text.trim(),
-      'especialidade': _especialidadeCtrl.text.trim(),
-      'nomeClinica': _clinicaNomeCtrl.text.trim(),
-      'rqe': _perfil['rqe'],
-      'subespecialidades': _perfil['subespecialidades'],
-      'tipoAtendimento': _perfil['tipoAtendimento'],
-      'enderecoClinica': _perfil['enderecoClinica'],
-      'tempoConsulta': _perfil['tempoConsulta'],
-      'valorConsulta': _perfil['valorConsulta'],
-    });
-    if (mounted) setState(() => _editandoProfissional = false);
-    _snack('Informações profissionais atualizadas!');
+    try {
+      await PerfilService.salvarProfissional({
+        'crm': _crmCtrl.text.trim(),
+        'especialidade': _especialidadeCtrl.text.trim(),
+        'nomeClinica': _clinicaNomeCtrl.text.trim(),
+        'rqe': _perfil['rqe'],
+        'subespecialidades': _perfil['subespecialidades'],
+        'tipoAtendimento': _perfil['tipoAtendimento'],
+        'enderecoClinica': _perfil['enderecoClinica'],
+        'tempoConsulta': _perfil['tempoConsulta'],
+        'valorConsulta': _perfil['valorConsulta'],
+      });
+      if (mounted) setState(() => _editandoProfissional = false);
+      _snack('Informações profissionais atualizadas!');
+    } catch (erro) {
+      if (mounted) _snack('Não foi possível concluir: $erro');
+    }
   }
 
   Future<void> _selecionarFoto() async {
-    final arquivo = await ImagePicker().pickImage(
-      source: ImageSource.gallery,
-      imageQuality: 82,
-    );
-    if (arquivo == null) return;
-    final bytes = await arquivo.readAsBytes();
-    await PerfilService.salvarFoto(bytes);
-    if (mounted) setState(() => _foto = bytes);
-    _snack('Foto atualizada no banco de dados!');
+    try {
+      final arquivo = await ImagePicker().pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 82,
+      );
+      if (arquivo == null) return;
+      final bytes = await arquivo.readAsBytes();
+      await PerfilService.salvarFoto(bytes);
+      if (mounted) setState(() => _foto = bytes);
+      _snack('Foto atualizada no banco de dados!');
+    } catch (erro) {
+      if (mounted) _snack('Não foi possível concluir: $erro');
+    }
   }
 
   Future<void> _alterarSenha() async {
-    if (_novaSenhaCtrl.text != _confirmSenhaCtrl.text) {
-      _snack('As novas senhas não coincidem.');
-      return;
+    try {
+      if (_novaSenhaCtrl.text != _confirmSenhaCtrl.text) {
+        _snack('As novas senhas não coincidem.');
+        return;
+      }
+      await PerfilService.alterarSenha(
+        _senhaAtualCtrl.text,
+        _novaSenhaCtrl.text,
+      );
+      _senhaAtualCtrl.clear();
+      _novaSenhaCtrl.clear();
+      _confirmSenhaCtrl.clear();
+      _snack('Senha atualizada no banco de dados!');
+    } catch (erro) {
+      if (mounted) _snack('Não foi possível concluir: $erro');
     }
-    await PerfilService.alterarSenha(_senhaAtualCtrl.text, _novaSenhaCtrl.text);
-    _senhaAtualCtrl.clear();
-    _novaSenhaCtrl.clear();
-    _confirmSenhaCtrl.clear();
-    _snack('Senha atualizada no banco de dados!');
   }
 
   @override
@@ -911,6 +930,7 @@ class _TelaConfiguracoesMedicoState extends State<TelaConfiguracoesMedico> {
   }
 
   void _snack(String msg) {
+    if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(msg),

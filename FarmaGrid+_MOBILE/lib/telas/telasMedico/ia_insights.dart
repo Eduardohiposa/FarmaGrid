@@ -1,3 +1,4 @@
+import 'package:farmagrid/widgets/carregamento.dart';
 import 'package:flutter/material.dart';
 import '../../services/medico_service.dart';
 import 'medico_visual.dart';
@@ -54,7 +55,7 @@ class _TelaIndicadoresClinicosState extends State<TelaIndicadoresClinicos> {
       );
     }
     if (_painel == null) {
-      return const Center(child: CircularProgressIndicator(color: medicoVerde));
+      return const CartaoCarregamento();
     }
     final diagnosticos = Map<String, dynamic>.from(
       _painel?['diagnosticos'] ?? const {},
@@ -69,6 +70,7 @@ class _TelaIndicadoresClinicosState extends State<TelaIndicadoresClinicos> {
       (s, v) => s + (v as num),
     );
 
+    final diagnosticosVisiveis = ordenados.take(5).toList();
     return RefreshIndicator(
       onRefresh: _carregar,
       color: medicoVerde,
@@ -135,8 +137,12 @@ class _TelaIndicadoresClinicosState extends State<TelaIndicadoresClinicos> {
                       style: TextStyle(color: Colors.grey, height: 1.4),
                     ),
                   )
-                : Column(
-                    children: ordenados.take(5).map((e) {
+                : ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: diagnosticosVisiveis.length,
+                    itemBuilder: (context, index) {
+                      final e = diagnosticosVisiveis[index];
                       final quantidade = (e.value as num).toDouble();
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 17),
@@ -185,7 +191,7 @@ class _TelaIndicadoresClinicosState extends State<TelaIndicadoresClinicos> {
                           ],
                         ),
                       );
-                    }).toList(),
+                    },
                   ),
           ),
           const SizedBox(height: 18),

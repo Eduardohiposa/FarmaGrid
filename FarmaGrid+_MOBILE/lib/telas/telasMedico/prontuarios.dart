@@ -1,3 +1,4 @@
+import 'package:farmagrid/widgets/carregamento.dart';
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'dart:typed_data';
@@ -85,7 +86,7 @@ class _TelaProntuariosState extends State<TelaProntuarios> {
                   ),
                   const SizedBox(height: 15),
                   if (_carregando)
-                    const Center(child: CircularProgressIndicator())
+                    const CartaoCarregamento()
                   else if (_erro != null)
                     Center(
                       child: TextButton(
@@ -101,8 +102,16 @@ class _TelaProntuariosState extends State<TelaProntuarios> {
                       ),
                     )
                   else
-                    ..._pacientesFiltrados.map(
-                      (p) => _construirCardPaciente(context, p),
+                    ListView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: _pacientesFiltrados.length,
+                      itemBuilder: (context, index) {
+                        return _construirCardPaciente(
+                          context,
+                          _pacientesFiltrados[index],
+                        );
+                      },
                     ),
                 ],
               ),
@@ -207,11 +216,7 @@ class _TelaProntuariosState extends State<TelaProntuarios> {
                 backgroundColor: corTealBotao.withValues(alpha: 0.2),
                 backgroundImage: foto == null ? null : MemoryImage(foto),
                 child: foto == null
-                    ? Icon(
-                        Icons.person_outline,
-                        color: corVerdeOliva,
-                        size: 26,
-                      )
+                    ? Icon(Icons.person_outline, color: corVerdeOliva, size: 26)
                     : null,
               ),
               const SizedBox(width: 12),

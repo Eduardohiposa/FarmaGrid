@@ -1,3 +1,4 @@
+import 'package:farmagrid/widgets/carregamento.dart';
 import 'package:flutter/material.dart';
 import '../../models/paciente_models.dart';
 import '../../services/paciente_service.dart';
@@ -205,7 +206,7 @@ class _TelaReceitasProntuariosState extends State<TelaReceitasProntuarios> {
   }
 
   Widget _conteudo() {
-    if (_carregando) return const Center(child: CircularProgressIndicator());
+    if (_carregando) return const CartaoCarregamento();
     if (_erro != null)
       return Center(
         child: TextButton(
@@ -216,11 +217,25 @@ class _TelaReceitasProntuariosState extends State<TelaReceitasProntuarios> {
     if (exibirReceitas) {
       if (_receitas.isEmpty)
         return const Center(child: Text('Nenhuma receita encontrada.'));
-      return Column(children: _receitas.map(_cardReceita).toList());
+      return ListView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: _receitas.length,
+        itemBuilder: (context, index) {
+          return _cardReceita(_receitas[index]);
+        },
+      );
     }
     if (_prontuarios.isEmpty)
       return const Center(child: Text('Nenhum prontuário encontrado.'));
-    return Column(children: _prontuarios.map(_cardProntuario).toList());
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: _prontuarios.length,
+      itemBuilder: (context, index) {
+        return _cardProntuario(_prontuarios[index]);
+      },
+    );
   }
 
   Widget _cardReceita(ReceitaPaciente receita) {

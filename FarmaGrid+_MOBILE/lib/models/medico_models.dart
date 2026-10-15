@@ -142,3 +142,55 @@ class ReceitaMedica {
     'status': status,
   };
 }
+
+class RegistroClinico {
+  final int id;
+  final String? condicao;
+  final String? ultimaVisita;
+  final String? cid10;
+  final String? pa;
+  final String? temperatura;
+  final String? spo2;
+  final String? anamnese;
+  final String? exameFisico;
+  final String? peso;
+  final String? conduta;
+  final String? dataRetorno;
+  final String? notas;
+  final String? status;
+  final String? tipo;
+  RegistroClinico.fromJson(Map<String, dynamic> json)
+    : id = int.tryParse((json['id'] ?? 0).toString()) ?? 0,
+      condicao = json['condicao']?.toString(),
+      ultimaVisita = json['ultimaVisita']?.toString(),
+      cid10 = json['cid10']?.toString(),
+      pa = json['pa']?.toString(),
+      temperatura = json['temperatura']?.toString(),
+      spo2 = json['spo2']?.toString(),
+      anamnese = json['anamnese']?.toString(),
+      exameFisico = json['exameFisico']?.toString(),
+      peso = json['peso']?.toString(),
+      conduta = json['conduta']?.toString(),
+      dataRetorno = json['dataRetorno']?.toString(),
+      notas = json['notas']?.toString(),
+      status = json['status']?.toString(),
+      tipo = json['tipo']?.toString();
+
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'condicao': condicao,
+    'ultimaVisita': ultimaVisita,
+    'cid10': cid10,
+    'pa': pa,
+    'temperatura': temperatura,
+    'spo2': spo2,
+    'anamnese': anamnese,
+    'exameFisico': exameFisico,
+    'peso': peso,
+    'conduta': conduta,
+    'dataRetorno': dataRetorno,
+    'notas': notas,
+    'status': status,
+    'tipo': tipo,
+  };
+}

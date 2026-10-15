@@ -35,9 +35,18 @@ class _TelaHomeMedicoState extends State<TelaHomeMedico> {
   void initState() {
     super.initState();
     _themeCtrl.addListener(() => setState(() {}));
-    PerfilService.carregar(atualizar: true).then((p) {
-      if (mounted) setState(() => _perfil = p);
-    });
+    PerfilService.carregar(atualizar: true)
+        .then((p) {
+          if (mounted) setState(() => _perfil = p);
+        })
+        .catchError((Object erro) {
+          if (mounted)
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Não foi possível carregar o perfil: $erro'),
+              ),
+            );
+        });
     MedicoService.listarAgenda()
         .then((lista) {
           final hoje = DateTime.now();
@@ -105,15 +114,22 @@ class _TelaHomeMedicoState extends State<TelaHomeMedico> {
                       style: TextStyle(color: Colors.grey),
                     )
                   else
-                    ..._consultasHoje.asMap().entries.map(
-                      (e) => _construirCardAgenda(
-                        e.value.nomePaciente.isEmpty
-                            ? 'Paciente #${e.value.idPaciente}'
-                            : e.value.nomePaciente,
-                        e.value.horario,
-                        e.value.tipo.isEmpty ? 'Consulta' : e.value.tipo,
-                        e.key == 0,
-                      ),
+                    ListView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: _consultasHoje.length,
+                      itemBuilder: (context, index) {
+                        return _construirCardAgenda(
+                          _consultasHoje[index].nomePaciente.isEmpty
+                              ? 'Paciente'
+                              : _consultasHoje[index].nomePaciente,
+                          _consultasHoje[index].horario,
+                          _consultasHoje[index].tipo.isEmpty
+                              ? 'Consulta'
+                              : _consultasHoje[index].tipo,
+                          index == 0,
+                        );
+                      },
                     ),
                   const SizedBox(height: 30),
                   Text(

@@ -1,3 +1,4 @@
+import 'package:farmagrid/widgets/carregamento.dart';
 import 'package:flutter/material.dart';
 import '../../services/medico_service.dart';
 import 'medico_visual.dart';
@@ -102,12 +103,13 @@ class _TelaRelatoriosState extends State<TelaRelatorios> {
       );
     }
     if (_painel == null) {
-      return const Center(child: CircularProgressIndicator(color: medicoVerde));
+      return const CartaoCarregamento();
     }
     final tipos = Map<String, dynamic>.from(
       _painel?['tiposConsulta'] ?? const {},
     );
     final totalTipos = tipos.values.fold<num>(0, (s, v) => s + (v as num));
+    final tiposVisiveis = tipos.entries.toList();
     return RefreshIndicator(
       onRefresh: _carregar,
       color: medicoVerde,
@@ -157,8 +159,12 @@ class _TelaRelatoriosState extends State<TelaRelatorios> {
                     'Nenhuma consulta registrada neste período.',
                     style: TextStyle(color: Colors.grey),
                   )
-                : Column(
-                    children: tipos.entries.map((e) {
+                : ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: tiposVisiveis.length,
+                    itemBuilder: (context, index) {
+                      final e = tiposVisiveis[index];
                       final qtd = e.value as num;
                       final percentual = totalTipos == 0
                           ? 0.0
@@ -217,7 +223,7 @@ class _TelaRelatoriosState extends State<TelaRelatorios> {
                           ],
                         ),
                       );
-                    }).toList(),
+                    },
                   ),
           ),
           const SizedBox(height: 18),

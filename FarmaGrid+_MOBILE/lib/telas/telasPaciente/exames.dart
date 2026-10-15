@@ -1,3 +1,5 @@
+import '../../models/paciente_models.dart';
+import 'package:farmagrid/widgets/carregamento.dart';
 import 'package:flutter/material.dart';
 import '../../services/paciente_service.dart';
 import 'paciente_visual.dart';
@@ -9,7 +11,8 @@ class TelaExames extends StatefulWidget {
 }
 
 class _TelaExamesState extends State<TelaExames> {
-  List<Map<String, dynamic>> _resultados = [], _solicitacoes = [];
+  List<ResultadoExame> _resultados = [];
+  List<SolicitacaoExame> _solicitacoes = [];
   bool _carregando = true;
   String? _erro;
 
@@ -31,8 +34,12 @@ class _TelaExamesState extends State<TelaExames> {
       ]);
       if (mounted) {
         setState(() {
-          _resultados = dados[0];
-          _solicitacoes = dados[1];
+          _resultados = List<ResultadoExame>.from(
+            dados[0].map((e) => ResultadoExame.fromJson(e)),
+          );
+          _solicitacoes = List<SolicitacaoExame>.from(
+            dados[1].map((e) => SolicitacaoExame.fromJson(e)),
+          );
         });
       }
     } catch (e) {
@@ -114,9 +121,7 @@ class _TelaExamesState extends State<TelaExames> {
 
   Widget _corpo() {
     if (_carregando) {
-      return const Center(
-        child: CircularProgressIndicator(color: pacienteVerde),
-      );
+      return const CartaoCarregamento();
     }
     if (_erro != null) {
       return Center(
@@ -148,19 +153,26 @@ class _TelaExamesState extends State<TelaExames> {
                 legenda: 'Acompanhe o andamento das solicitações enviadas',
               ),
               const SizedBox(height: 15),
-              ..._solicitacoes.map(_cardSolicitacao),
+              ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: _solicitacoes.length,
+                itemBuilder: (context, index) {
+                  return _cardSolicitacao(_solicitacoes[index]);
+                },
+              ),
             ],
           ),
   );
 
-  Widget _cardSolicitacao(Map<String, dynamic> exame) {
-    final status = '${exame['status'] ?? 'Solicitado'}';
+  Widget _cardSolicitacao(SolicitacaoExame exame) {
+    final status = '${exame.status ?? 'Solicitado'}';
     final statusNormalizado = status.toLowerCase();
     final concluido =
         statusNormalizado.contains('conclu') ||
         statusNormalizado.contains('dispon');
     final cor = concluido ? pacienteVerdeEscuro : const Color(0xFFB97827);
-    final justificativa = '${exame['justificativa'] ?? ''}'.trim();
+    final justificativa = '${exame.justificativa ?? ''}'.trim();
     return PacienteCard(
       margin: const EdgeInsets.only(bottom: 14),
       child: Column(
@@ -183,7 +195,7 @@ class _TelaExamesState extends State<TelaExames> {
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
-                  '${exame['exame'] ?? 'Exame'}',
+                  '${exame.exame ?? 'Exame'}',
                   style: const TextStyle(
                     color: pacienteTexto,
                     fontSize: 15,
@@ -260,7 +272,7 @@ class _TelaExamesState extends State<TelaExames> {
               ),
               const SizedBox(width: 6),
               Text(
-                'Solicitado em ${_texto(exame['solicitadoEm'], vazio: 'data não informada')}',
+                'Solicitado em ${_texto(exame.solicitadoEm, vazio: 'data não informada')}',
                 style: const TextStyle(color: Colors.grey, fontSize: 11),
               ),
             ],
@@ -287,12 +299,19 @@ class _TelaExamesState extends State<TelaExames> {
                 legenda: 'Documentos armazenados no seu prontuário',
               ),
               const SizedBox(height: 15),
-              ..._resultados.map(_cardResultado),
+              ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: _resultados.length,
+                itemBuilder: (context, index) {
+                  return _cardResultado(_resultados[index]);
+                },
+              ),
             ],
           ),
   );
 
-  Widget _cardResultado(Map<String, dynamic> exame) => PacienteCard(
+  Widget _cardResultado(ResultadoExame exame) => PacienteCard(
     margin: const EdgeInsets.only(bottom: 14),
     child: InkWell(
       onTap: () => _detalharResultado(exame),
@@ -317,7 +336,7 @@ class _TelaExamesState extends State<TelaExames> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  '${exame['titulo'] ?? 'Exame'}',
+                  '${exame.titulo ?? 'Exame'}',
                   style: const TextStyle(
                     color: pacienteTexto,
                     fontWeight: FontWeight.w700,
@@ -326,7 +345,7 @@ class _TelaExamesState extends State<TelaExames> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  '${_texto(exame['tipo'], vazio: 'Resultado')}  •  ${_texto(exame['data'], vazio: 'Sem data')}',
+                  '${_texto(exame.tipo, vazio: 'Resultado')}  •  ${_texto(exame.data, vazio: 'Sem data')}',
                   style: const TextStyle(color: Colors.grey, fontSize: 11),
                 ),
               ],
@@ -495,88 +514,87 @@ class _TelaExamesState extends State<TelaExames> {
     }
   }
 
-  void _detalharResultado(Map<String, dynamic> exame) =>
-      showModalBottomSheet<void>(
-        context: context,
-        backgroundColor: pacienteFundo,
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
-        ),
-        builder: (ctx) => Padding(
-          padding: const EdgeInsets.fromLTRB(24, 14, 24, 30),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
+  void _detalharResultado(ResultadoExame exame) => showModalBottomSheet<void>(
+    context: context,
+    backgroundColor: pacienteFundo,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+    ),
+    builder: (ctx) => Padding(
+      padding: const EdgeInsets.fromLTRB(24, 14, 24, 30),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Center(
+            child: Container(
+              width: 42,
+              height: 5,
+              decoration: BoxDecoration(
+                color: Colors.black12,
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
+          Row(
             children: [
-              Center(
-                child: Container(
-                  width: 42,
-                  height: 5,
-                  decoration: BoxDecoration(
-                    color: Colors.black12,
-                    borderRadius: BorderRadius.circular(10),
+              Container(
+                padding: const EdgeInsets.all(11),
+                decoration: BoxDecoration(
+                  color: pacienteVerde.withValues(alpha: .1),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: const Icon(
+                  Icons.picture_as_pdf_outlined,
+                  color: pacienteVerdeEscuro,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  '${exame.titulo ?? 'Exame'}',
+                  style: const TextStyle(
+                    color: pacienteTexto,
+                    fontSize: 19,
+                    fontWeight: FontWeight.w800,
                   ),
                 ),
               ),
-              const SizedBox(height: 20),
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(11),
-                    decoration: BoxDecoration(
-                      color: pacienteVerde.withValues(alpha: .1),
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    child: const Icon(
-                      Icons.picture_as_pdf_outlined,
-                      color: pacienteVerdeEscuro,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      '${exame['titulo'] ?? 'Exame'}',
-                      style: const TextStyle(
-                        color: pacienteTexto,
-                        fontSize: 19,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                  ),
-                  IconButton(
-                    onPressed: () => Navigator.pop(ctx),
-                    icon: const Icon(Icons.close),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 18),
-              PacienteCard(
-                child: Column(
-                  children: [
-                    _linhaDetalhe(
-                      'Tipo',
-                      _texto(exame['tipo'], vazio: 'Resultado'),
-                      Icons.category_outlined,
-                    ),
-                    const Divider(height: 25, color: Color(0xFFECECEC)),
-                    _linhaDetalhe(
-                      'Data',
-                      _texto(exame['data'], vazio: 'Não informada'),
-                      Icons.calendar_today_outlined,
-                    ),
-                    const Divider(height: 25, color: Color(0xFFECECEC)),
-                    _linhaDetalhe(
-                      'Armazenamento',
-                      'Prontuário do paciente',
-                      Icons.health_and_safety_outlined,
-                    ),
-                  ],
-                ),
+              IconButton(
+                onPressed: () => Navigator.pop(ctx),
+                icon: const Icon(Icons.close),
               ),
             ],
           ),
-        ),
-      );
+          const SizedBox(height: 18),
+          PacienteCard(
+            child: Column(
+              children: [
+                _linhaDetalhe(
+                  'Tipo',
+                  _texto(exame.tipo, vazio: 'Resultado'),
+                  Icons.category_outlined,
+                ),
+                const Divider(height: 25, color: Color(0xFFECECEC)),
+                _linhaDetalhe(
+                  'Data',
+                  _texto(exame.data, vazio: 'Não informada'),
+                  Icons.calendar_today_outlined,
+                ),
+                const Divider(height: 25, color: Color(0xFFECECEC)),
+                _linhaDetalhe(
+                  'Armazenamento',
+                  'Prontuário do paciente',
+                  Icons.health_and_safety_outlined,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
 
   Widget _campo(
     TextEditingController controller,

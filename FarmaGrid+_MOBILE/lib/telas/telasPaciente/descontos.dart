@@ -1,3 +1,4 @@
+import 'package:farmagrid/widgets/carregamento.dart';
 import 'package:farmagrid/telas/login.dart';
 import 'package:flutter/material.dart';
 import '../../models/paciente_models.dart';
@@ -80,7 +81,7 @@ class _TelaDescontosState extends State<TelaDescontos> {
                   ),
                   const SizedBox(height: 20),
                   if (_carregandoCupons)
-                    const Center(child: CircularProgressIndicator())
+                    const CartaoCarregamento()
                   else if (_erroCupons != null)
                     Center(
                       child: Text(
@@ -91,11 +92,16 @@ class _TelaDescontosState extends State<TelaDescontos> {
                   else if (_cupons.isEmpty)
                     const Center(child: Text('Nenhum desconto disponível.'))
                   else
-                    ..._cupons.map(
-                      (cupom) => Padding(
-                        padding: const EdgeInsets.only(bottom: 15),
-                        child: _buildCardDesconto(cupom),
-                      ),
+                    ListView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: _cupons.length,
+                      itemBuilder: (context, index) {
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 15),
+                          child: _buildCardDesconto(_cupons[index]),
+                        );
+                      },
                     ),
                 ],
               ),

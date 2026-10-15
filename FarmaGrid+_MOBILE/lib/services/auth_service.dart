@@ -1,3 +1,4 @@
+import '../widgets/carregamento.dart';
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
@@ -32,40 +33,44 @@ class AuthService {
     String senha,
     int tipo,
   ) async {
-    try {
-      final resposta = await http.post(
-        Uri.parse('${ApiConfig.baseUrl}/auth/login'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'email': email, 'senha': senha, 'tipo': tipo}),
-      );
+    return Carregamento.executar('Entrando...', () async {
+      try {
+        final resposta = await http
+            .post(
+              Uri.parse('${ApiConfig.baseUrl}/auth/login'),
+              headers: {'Content-Type': 'application/json'},
+              body: jsonEncode({'email': email, 'senha': senha, 'tipo': tipo}),
+            )
+            .timeout(const Duration(seconds: 30));
 
-      if (resposta.statusCode != 200) {
-        throw ApiException(_extrairMensagemErro(resposta));
+        if (resposta.statusCode != 200) {
+          throw ApiException(_extrairMensagemErro(resposta));
+        }
+
+        final dynamic json = jsonDecode(resposta.body);
+
+        if (json is! Map<String, dynamic>) {
+          throw ApiException('Resposta inválida recebida do servidor.');
+        }
+
+        final usuario = UsuarioLogado.fromJson(json);
+
+        usuarioLogado = usuario;
+
+        await _storage.write(
+          key: _chaveSessao,
+          value: jsonEncode(usuario.toJson()),
+        );
+
+        return usuario;
+      } on ApiException {
+        rethrow;
+      } catch (e) {
+        throw ApiException(
+          'Não foi possível conectar ao servidor. Verifique se a API está em execução em ${ApiConfig.baseUrl}.',
+        );
       }
-
-      final dynamic json = jsonDecode(resposta.body);
-
-      if (json is! Map<String, dynamic>) {
-        throw ApiException('Resposta inválida recebida do servidor.');
-      }
-
-      final usuario = UsuarioLogado.fromJson(json);
-
-      usuarioLogado = usuario;
-
-      await _storage.write(
-        key: _chaveSessao,
-        value: jsonEncode(usuario.toJson()),
-      );
-
-      return usuario;
-    } on ApiException {
-      rethrow;
-    } catch (e) {
-      throw ApiException(
-        'Não foi possível conectar ao servidor. Verifique se a API está em execução em ${ApiConfig.baseUrl}.',
-      );
-    }
+    });
   }
 
   static Future<void> cadastrarPaciente({
@@ -147,23 +152,27 @@ class AuthService {
   }
 
   static Future<void> _post(String path, Map<String, dynamic> body) async {
-    try {
-      final resposta = await http.post(
-        Uri.parse('${ApiConfig.baseUrl}$path'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode(body),
-      );
+    return Carregamento.executar('Criando sua conta...', () async {
+      try {
+        final resposta = await http
+            .post(
+              Uri.parse('${ApiConfig.baseUrl}$path'),
+              headers: {'Content-Type': 'application/json'},
+              body: jsonEncode(body),
+            )
+            .timeout(const Duration(seconds: 30));
 
-      if (resposta.statusCode < 200 || resposta.statusCode >= 300) {
-        throw ApiException(_extrairMensagemErro(resposta));
+        if (resposta.statusCode < 200 || resposta.statusCode >= 300) {
+          throw ApiException(_extrairMensagemErro(resposta));
+        }
+      } on ApiException {
+        rethrow;
+      } catch (e) {
+        throw ApiException(
+          'Não foi possível conectar ao servidor. Verifique se a API está em execução em ${ApiConfig.baseUrl}.',
+        );
       }
-    } on ApiException {
-      rethrow;
-    } catch (e) {
-      throw ApiException(
-        'Não foi possível conectar ao servidor. Verifique se a API está em execução em ${ApiConfig.baseUrl}.',
-      );
-    }
+    });
   }
 
   static Future<bool> restaurarSessao() async {

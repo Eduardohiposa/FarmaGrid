@@ -1,6 +1,8 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../config/api_config.dart';
+import '../widgets/carregamento.dart';
 import 'auth_service.dart';
 
 class ApiService {
@@ -11,95 +13,97 @@ class ApiService {
   };
 
   static Future<List<Map<String, dynamic>>> getList(String path) async {
-    final value = await _request('GET', path);
-    return (value as List? ?? const [])
-        .whereType<Map>()
-        .map((item) => Map<String, dynamic>.from(item))
-        .toList();
+    final value = await requisitar('GET', path);
+    if (value is! List || value.any((item) => item is! Map)) {
+      throw ApiException(
+        'O servidor retornou uma lista inválida. Tente novamente.',
+      );
+    }
+    return List<Map<String, dynamic>>.from(
+      value.map((item) => Map<String, dynamic>.from(item as Map)),
+    );
   }
 
-  static Future<Map<String, dynamic>> getMap(String path) async {
-    final value = await _request('GET', path);
-    return value is Map
-        ? Map<String, dynamic>.from(value)
-        : <String, dynamic>{};
-  }
+  static Future<Map<String, dynamic>> getMap(String path) async =>
+      _map(await requisitar('GET', path));
 
   static Future<Map<String, dynamic>> post(
     String path,
     Map<String, dynamic> body,
-  ) => _send('POST', path, body);
+  ) async => _map(await requisitar('POST', path, body: body));
   static Future<Map<String, dynamic>> put(
     String path,
     Map<String, dynamic> body,
-  ) => _send('PUT', path, body);
-
+  ) async => _map(await requisitar('PUT', path, body: body));
   static Future<void> delete(String path) async {
-    final response = await http.delete(
-      Uri.parse('${ApiConfig.baseUrl}$path'),
-      headers: headers,
-    );
-    _decode(response);
+    await requisitar('DELETE', path);
   }
 
-  static Future<Map<String, dynamic>> _send(
+  static Map<String, dynamic> _map(dynamic value) =>
+      value is Map ? Map<String, dynamic>.from(value) : <String, dynamic>{};
+
+  static String _mensagem(String method, String path) {
+    if (method == 'GET') {
+      return path.contains('farmacias-proximas')
+          ? 'Buscando farmácias...'
+          : 'Carregando...';
+    }
+    if (method == 'DELETE') return 'Removendo...';
+    if (path.contains('resgatar')) return 'Resgatando cupom...';
+    if (path.contains('/senha')) return 'Atualizando senha...';
+    if (path.contains('/foto')) return 'Atualizando foto...';
+    if (path.contains('/assinatura')) return 'Atualizando plano...';
+    if (path.contains('/teleconsultas')) return 'Agendando consulta...';
+    if (path.contains('/solicitacoes-exame')) return 'Enviando solicitação...';
+    if (path.contains('/receitas')) return 'Gerando receita...';
+    return 'Salvando...';
+  }
+
+  static Future<dynamic> requisitar(
     String method,
-    String path,
-    Map<String, dynamic> body,
-  ) async {
-    final request = http.Request(method, Uri.parse('${ApiConfig.baseUrl}$path'))
-      ..headers.addAll(headers)
-      ..body = jsonEncode(body);
-    final response = await http.Response.fromStream(await request.send());
-    final value = _decode(response);
-    return value is Map
-        ? Map<String, dynamic>.from(value)
-        : <String, dynamic>{};
-  }
-
-  static dynamic _decode(http.Response response) {
-    dynamic body;
+    String path, {
+    Map<String, dynamic>? body,
+  }) => Carregamento.executar(_mensagem(method, path), () async {
+    final client = http.Client();
     try {
-      body = response.body.isEmpty ? null : jsonDecode(response.body);
-    } catch (_) {
-      body = response.body;
-    }
-    if (response.statusCode < 200 || response.statusCode >= 300) {
-      throw ApiException(
-        body is Map
-            ? '${body['message'] ?? body['error'] ?? 'Erro HTTP ${response.statusCode}'}'
-            : '${body ?? 'Erro HTTP ${response.statusCode}'}',
-      );
-    }
-    return body;
-  }
-
-  static Future<dynamic> _request(String method, String path) async {
-    try {
-      final response = await http.get(
+      final request = http.Request(
+        method,
         Uri.parse('${ApiConfig.baseUrl}$path'),
-        headers: headers,
-      );
-      dynamic body;
+      )..headers.addAll(headers);
+      if (body != null) request.body = jsonEncode(body);
+      final response = await client
+          .send(request)
+          .then(http.Response.fromStream)
+          .timeout(
+            Duration(seconds: path.contains('farmacias-proximas') ? 100 : 30),
+          );
+      final texto = utf8.decode(response.bodyBytes);
+      dynamic value;
       try {
-        body = response.body.isEmpty ? null : jsonDecode(response.body);
-      } catch (_) {
-        body = response.body;
+        value = texto.isEmpty ? null : jsonDecode(texto);
+      } on FormatException {
+        value = texto;
       }
       if (response.statusCode < 200 || response.statusCode >= 300) {
         throw ApiException(
-          body is Map
-              ? '${body['message'] ?? body['error'] ?? 'Erro HTTP ${response.statusCode}'}'
-              : '$body',
+          value is Map
+              ? '${value['message'] ?? value['mensagem'] ?? value['error'] ?? 'Erro HTTP ${response.statusCode}'}'
+              : '${value ?? 'Erro HTTP ${response.statusCode}'}',
         );
       }
-      return body;
+      return value;
     } on ApiException {
       rethrow;
+    } on TimeoutException {
+      throw ApiException(
+        'A operação demorou mais que o esperado. Tente novamente.',
+      );
     } catch (_) {
       throw ApiException(
-        'Não foi possível conectar à API em ${ApiConfig.baseUrl}.',
+        'Não foi possível conectar ao servidor. Verifique sua conexão e tente novamente.',
       );
+    } finally {
+      client.close();
     }
-  }
+  });
 }

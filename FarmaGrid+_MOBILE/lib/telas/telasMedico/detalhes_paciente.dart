@@ -1,3 +1,5 @@
+import '../../models/medico_models.dart';
+import 'package:farmagrid/widgets/carregamento.dart';
 import 'dart:convert';
 import 'dart:typed_data';
 
@@ -20,7 +22,7 @@ class TelaDetalhesPaciente extends StatefulWidget {
 }
 
 class _TelaDetalhesPacienteState extends State<TelaDetalhesPaciente> {
-  List<Map<String, dynamic>> _registros = [];
+  List<RegistroClinico> _registros = [];
   Map<String, dynamic> _perfilPaciente = {};
   bool _carregando = true;
   String? _erro;
@@ -62,7 +64,11 @@ class _TelaDetalhesPacienteState extends State<TelaDetalhesPaciente> {
       ]);
       if (mounted) {
         setState(() {
-          _registros = resultados[0] as List<Map<String, dynamic>>;
+          _registros = List<RegistroClinico>.from(
+            (resultados[0] as List<Map<String, dynamic>>).map(
+              (p) => RegistroClinico.fromJson(p),
+            ),
+          );
           _perfilPaciente = resultados[1] as Map<String, dynamic>;
         });
       }
@@ -77,53 +83,53 @@ class _TelaDetalhesPacienteState extends State<TelaDetalhesPaciente> {
   Widget build(BuildContext context) {
     final fotoPaciente = _fotoPaciente;
     return Scaffold(
-    backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-    body: Column(
-      children: [
-        MedicoCabecalho(
-          titulo: 'Prontuário',
-          subtitulo: widget.nome,
-          rodape: Row(
-            children: [
-              CircleAvatar(
-                radius: 22,
-                backgroundColor: Colors.white.withValues(alpha: .2),
-                backgroundImage: fotoPaciente == null
-                    ? null
-                    : MemoryImage(fotoPaciente),
-                child: fotoPaciente == null
-                    ? const Icon(Icons.person_outline, color: Colors.white)
-                    : null,
-              ),
-              const SizedBox(width: 11),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Paciente',
-                    style: TextStyle(color: Colors.white70, fontSize: 11),
-                  ),
-                  Text(
-                    _cpfPaciente,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w600,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      body: Column(
+        children: [
+          MedicoCabecalho(
+            titulo: 'Prontuário',
+            subtitulo: widget.nome,
+            rodape: Row(
+              children: [
+                CircleAvatar(
+                  radius: 22,
+                  backgroundColor: Colors.white.withValues(alpha: .2),
+                  backgroundImage: fotoPaciente == null
+                      ? null
+                      : MemoryImage(fotoPaciente),
+                  child: fotoPaciente == null
+                      ? const Icon(Icons.person_outline, color: Colors.white)
+                      : null,
+                ),
+                const SizedBox(width: 11),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Paciente',
+                      style: TextStyle(color: Colors.white70, fontSize: 11),
                     ),
-                  ),
-                ],
-              ),
-            ],
+                    Text(
+                      _cpfPaciente,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
-        ),
-        Expanded(child: _conteudo()),
-      ],
-    ),
+          Expanded(child: _conteudo()),
+        ],
+      ),
     );
   }
 
   Widget _conteudo() {
     if (_carregando) {
-      return const Center(child: CircularProgressIndicator(color: medicoVerde));
+      return const CartaoCarregamento();
     }
     if (_erro != null) {
       return Center(
@@ -210,14 +216,21 @@ class _TelaDetalhesPacienteState extends State<TelaDetalhesPaciente> {
               legenda: 'Evoluções clínicas salvas no banco',
             ),
             const SizedBox(height: 15),
-            ..._registros.map(_registroCard),
+            ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: _registros.length,
+              itemBuilder: (context, index) {
+                return _registroCard(_registros[index]);
+              },
+            ),
           ],
         ],
       ),
     );
   }
 
-  Widget _resumoClinico(Map<String, dynamic> p) => MedicoCard(
+  Widget _resumoClinico(RegistroClinico p) => MedicoCard(
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -237,7 +250,7 @@ class _TelaDetalhesPacienteState extends State<TelaDetalhesPaciente> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    textoSeguro(p['condicao'], vazio: 'Atendimento clínico'),
+                    textoSeguro(p.condicao, vazio: 'Atendimento clínico'),
                     style: const TextStyle(
                       color: medicoTexto,
                       fontSize: 16,
@@ -245,7 +258,7 @@ class _TelaDetalhesPacienteState extends State<TelaDetalhesPaciente> {
                     ),
                   ),
                   Text(
-                    '${textoSeguro(p['ultimaVisita'], vazio: 'Data não informada')}  •  CID ${textoSeguro(p['cid10'], vazio: 'não informado')}',
+                    '${textoSeguro(p.ultimaVisita, vazio: 'Data não informada')}  •  CID ${textoSeguro(p.cid10, vazio: 'não informado')}',
                     style: const TextStyle(color: Colors.grey, fontSize: 12),
                   ),
                 ],
@@ -256,17 +269,17 @@ class _TelaDetalhesPacienteState extends State<TelaDetalhesPaciente> {
         const SizedBox(height: 18),
         Row(
           children: [
-            Expanded(child: _vital('PA', p['pa'], Icons.favorite_border)),
+            Expanded(child: _vital('PA', p.pa, Icons.favorite_border)),
             const SizedBox(width: 8),
             Expanded(
               child: _vital(
                 'Temperatura',
-                p['temperatura'],
+                p.temperatura,
                 Icons.thermostat_outlined,
               ),
             ),
             const SizedBox(width: 8),
-            Expanded(child: _vital('SpO₂', p['spo2'], Icons.air)),
+            Expanded(child: _vital('SpO₂', p.spo2, Icons.air)),
           ],
         ),
       ],
@@ -301,7 +314,7 @@ class _TelaDetalhesPacienteState extends State<TelaDetalhesPaciente> {
     ),
   );
 
-  Widget _registroCard(Map<String, dynamic> p) => MedicoCard(
+  Widget _registroCard(RegistroClinico p) => MedicoCard(
     margin: const EdgeInsets.only(bottom: 14),
     padding: EdgeInsets.zero,
     child: Theme(
@@ -318,7 +331,7 @@ class _TelaDetalhesPacienteState extends State<TelaDetalhesPaciente> {
           ),
         ),
         title: Text(
-          textoSeguro(p['condicao'], vazio: 'Atendimento clínico'),
+          textoSeguro(p.condicao, vazio: 'Atendimento clínico'),
           style: const TextStyle(
             fontWeight: FontWeight.w700,
             color: medicoTexto,
@@ -326,51 +339,51 @@ class _TelaDetalhesPacienteState extends State<TelaDetalhesPaciente> {
           ),
         ),
         subtitle: Text(
-          '${textoSeguro(p['ultimaVisita'], vazio: 'Sem data')}  •  CID ${textoSeguro(p['cid10'], vazio: '—')}',
+          '${textoSeguro(p.ultimaVisita, vazio: 'Sem data')}  •  CID ${textoSeguro(p.cid10, vazio: '—')}',
           style: const TextStyle(color: Colors.grey, fontSize: 11),
         ),
         trailing: IconButton(
           icon: const Icon(Icons.edit_outlined, color: medicoVerde),
           tooltip: 'Editar registro',
-          onPressed: () => _abrirFormulario(p),
+          onPressed: () => _abrirFormulario(p.toJson()),
         ),
         children: [
-          _secaoRegistro('Anamnese', p['anamnese'], Icons.chat_bubble_outline),
+          _secaoRegistro('Anamnese', p.anamnese, Icons.chat_bubble_outline),
           _secaoRegistro(
             'Exame físico',
-            p['exameFisico'],
+            p.exameFisico,
             Icons.health_and_safety_outlined,
           ),
           const SizedBox(height: 4),
           Row(
             children: [
-              Expanded(child: _vital('PA', p['pa'], Icons.favorite_border)),
+              Expanded(child: _vital('PA', p.pa, Icons.favorite_border)),
               const SizedBox(width: 7),
               Expanded(
                 child: _vital(
                   'Temp.',
-                  p['temperatura'],
+                  p.temperatura,
                   Icons.thermostat_outlined,
                 ),
               ),
               const SizedBox(width: 7),
               Expanded(
-                child: _vital('Peso', p['peso'], Icons.monitor_weight_outlined),
+                child: _vital('Peso', p.peso, Icons.monitor_weight_outlined),
               ),
               const SizedBox(width: 7),
-              Expanded(child: _vital('SpO₂', p['spo2'], Icons.air)),
+              Expanded(child: _vital('SpO₂', p.spo2, Icons.air)),
             ],
           ),
           const SizedBox(height: 14),
-          _secaoRegistro('Conduta', p['conduta'], Icons.task_alt_outlined),
-          if (textoSeguro(p['dataRetorno'], vazio: '').isNotEmpty)
+          _secaoRegistro('Conduta', p.conduta, Icons.task_alt_outlined),
+          if (textoSeguro(p.dataRetorno, vazio: '').isNotEmpty)
             _secaoRegistro(
               'Retorno',
-              p['dataRetorno'],
+              p.dataRetorno,
               Icons.event_repeat_outlined,
             ),
-          if (textoSeguro(p['notas'], vazio: '').isNotEmpty)
-            _secaoRegistro('Observações', p['notas'], Icons.notes_outlined),
+          if (textoSeguro(p.notas, vazio: '').isNotEmpty)
+            _secaoRegistro('Observações', p.notas, Icons.notes_outlined),
         ],
       ),
     ),

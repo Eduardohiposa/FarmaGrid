@@ -1,41 +1,47 @@
+import '../models/lista_models.dart';
 import 'package:flutter/material.dart';
 
 class TelaSobreNos extends StatelessWidget {
   const TelaSobreNos({super.key});
 
-  static const List<Map<String, dynamic>> _devs = [
-    {
-      'nome': 'Ana Carolina Lanzoni',
-      'curso': 'Análise e Desenvolvimento de Sistemas',
-      'ra': 'RA: 204057',
-      'descricao': 'Desenvolvedora mobile em Flutter, responsável pela concepção e implementação da aplicação móvel do FarmaGrid+. Atuou na definição da arquitetura das telas, criação do design, desenvolvimento das funcionalidades e otimização da experiência do usuário, garantindo uma navegação intuitiva e eficiente.',
-      'imagemAsset': 'assets/images/carol.jpeg',
-      'github': 'github.com/lanzonicaroll',
-      'linkedin': '-',
-    },
-    {
-      'nome': 'Heloisa Pola Argentin',
-      'curso': 'Análise e Desenvolvimento de Sistemas',
-      'ra': 'RA: 204215',
-      'descricao': 'Desenvolvedora desktop responsável pela criação e manutenção da aplicação voltada ao ambiente administrativo do FarmaGrid+. Atuou no desenvolvimento de funcionalidades estratégicas, integração com os demais sistemas e implementação de recursos que contribuem para a gestão e operação da plataforma.',
-      'imagemAsset': 'assets/images/heloisa.jpeg',
-      'github': 'github.com/Heloisa012',
-      'linkedin': '-',
-    },
-    {
-      'nome': 'Gabriel Andreolli Aires',
-      'curso': 'Análise e Desenvolvimento de Sistemas',
-      'ra': 'RA: 204062',
-      'descricao': 'Desenvolvedor responsável pela estrutura web e pelos serviços backend do FarmaGrid+. Liderou a construção das APIs, modelagem do banco de dados e implementação das regras de negócio, assegurando a comunicação segura e eficiente entre os diferentes módulos da plataforma.',
-      'imagemAsset': 'assets/images/aires.jpeg',
-      'github': 'github.com/AiresGabrielAndreolli',
-      'linkedin': '-',
-    },
-  ];
+  static final List<MembroEquipe> _devs = List<MembroEquipe>.from(
+    [
+      {
+        'nome': 'Ana Carolina Lanzoni',
+        'curso': 'Análise e Desenvolvimento de Sistemas',
+        'ra': 'RA: 204057',
+        'descricao':
+            'Desenvolvedora mobile em Flutter, responsável pela concepção e implementação da aplicação móvel do FarmaGrid+. Atuou na definição da arquitetura das telas, criação do design, desenvolvimento das funcionalidades e otimização da experiência do usuário, garantindo uma navegação intuitiva e eficiente.',
+        'imagemAsset': 'assets/images/carol.jpeg',
+        'github': 'github.com/lanzonicaroll',
+        'linkedin': '-',
+      },
+      {
+        'nome': 'Heloisa Pola Argentin',
+        'curso': 'Análise e Desenvolvimento de Sistemas',
+        'ra': 'RA: 204215',
+        'descricao':
+            'Desenvolvedora desktop responsável pela criação e manutenção da aplicação voltada ao ambiente administrativo do FarmaGrid+. Atuou no desenvolvimento de funcionalidades estratégicas, integração com os demais sistemas e implementação de recursos que contribuem para a gestão e operação da plataforma.',
+        'imagemAsset': 'assets/images/heloisa.jpeg',
+        'github': 'github.com/Heloisa012',
+        'linkedin': '-',
+      },
+      {
+        'nome': 'Gabriel Andreolli Aires',
+        'curso': 'Análise e Desenvolvimento de Sistemas',
+        'ra': 'RA: 204062',
+        'descricao':
+            'Desenvolvedor responsável pela estrutura web e pelos serviços backend do FarmaGrid+. Liderou a construção das APIs, modelagem do banco de dados e implementação das regras de negócio, assegurando a comunicação segura e eficiente entre os diferentes módulos da plataforma.',
+        'imagemAsset': 'assets/images/aires.jpeg',
+        'github': 'github.com/AiresGabrielAndreolli',
+        'linkedin': '-',
+      },
+    ].map((d) => MembroEquipe.fromJson(d)),
+  );
 
   static const Color _verde = Color(0xFF59AA53);
   static const Color _oliva = Color(0xFF136A48);
-  static const Color _teal  = Color(0xFF7FC6BB);
+  static const Color _teal = Color(0xFF7FC6BB);
   static const Color _fundo = Color(0xFFF5F5F5);
 
   @override
@@ -68,7 +74,14 @@ class TelaSobreNos extends StatelessWidget {
                     style: const TextStyle(color: Colors.grey, fontSize: 13),
                   ),
                   const SizedBox(height: 20),
-                  ..._devs.map((d) => _cardDev(d)),
+                  ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: _devs.length,
+                    itemBuilder: (context, index) {
+                      return _cardDev(_devs[index]);
+                    },
+                  ),
                   const SizedBox(height: 30),
                   _rodape(),
                   const SizedBox(height: 40),
@@ -86,7 +99,12 @@ class TelaSobreNos extends StatelessWidget {
       children: [
         Container(
           width: double.infinity,
-          padding: const EdgeInsets.only(top: 60, left: 25, right: 25, bottom: 28),
+          padding: const EdgeInsets.only(
+            top: 60,
+            left: 25,
+            right: 25,
+            bottom: 28,
+          ),
           decoration: const BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topCenter,
@@ -103,7 +121,11 @@ class TelaSobreNos extends StatelessWidget {
             children: [
               GestureDetector(
                 onTap: () => Navigator.pop(context),
-                child: const Icon(Icons.arrow_back, color: Colors.white, size: 26),
+                child: const Icon(
+                  Icons.arrow_back,
+                  color: Colors.white,
+                  size: 26,
+                ),
               ),
               const SizedBox(height: 16),
               const Text(
@@ -178,7 +200,11 @@ class TelaSobreNos extends StatelessWidget {
                   color: _verde.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Icon(Icons.local_hospital_outlined, color: _oliva, size: 24),
+                child: const Icon(
+                  Icons.local_hospital_outlined,
+                  color: _oliva,
+                  size: 24,
+                ),
               ),
               const SizedBox(width: 12),
               const Expanded(
@@ -208,7 +234,11 @@ class TelaSobreNos extends StatelessWidget {
             "médicos e farmácias em um único ecossistema digital. Desenvolvido "
             "como Projeto Integrador do curso de DS, o app oferece teleconsultas, "
             "prescrições digitais, localização de farmácias parceiras e muito mais.",
-            style: TextStyle(color: Color(0xFF444444), fontSize: 13, height: 1.6),
+            style: TextStyle(
+              color: Color(0xFF444444),
+              fontSize: 13,
+              height: 1.6,
+            ),
           ),
           const SizedBox(height: 14),
           Wrap(
@@ -237,13 +267,20 @@ class TelaSobreNos extends StatelessWidget {
         children: [
           Icon(icone, size: 13, color: _oliva),
           const SizedBox(width: 5),
-          Text(texto, style: const TextStyle(color: _oliva, fontSize: 12, fontWeight: FontWeight.w600)),
+          Text(
+            texto,
+            style: const TextStyle(
+              color: _oliva,
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
         ],
       ),
     );
   }
 
-  Widget _cardDev(Map<String, dynamic> dev) {
+  Widget _cardDev(MembroEquipe dev) {
     return Container(
       margin: const EdgeInsets.only(bottom: 20),
       decoration: BoxDecoration(
@@ -284,14 +321,12 @@ class TelaSobreNos extends StatelessWidget {
                     color: Colors.white.withValues(alpha: 0.2),
                   ),
                   child: ClipOval(
-                    child: dev['imagemAsset'] != null
-                        ? Image.asset(dev['imagemAsset'], fit: BoxFit.cover)
-                        : const Icon(Icons.person, size: 55, color: Colors.white),
+                    child: Image.asset(dev.imagemAsset, fit: BoxFit.cover),
                   ),
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  dev['nome'],
+                  dev.nome,
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 17,
@@ -301,7 +336,7 @@ class TelaSobreNos extends StatelessWidget {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  dev['ra'],
+                  dev.ra,
                   style: const TextStyle(color: Colors.white70, fontSize: 12),
                 ),
               ],
@@ -318,7 +353,7 @@ class TelaSobreNos extends StatelessWidget {
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        dev['curso'],
+                        dev.curso,
                         style: const TextStyle(
                           color: _oliva,
                           fontWeight: FontWeight.w600,
@@ -332,7 +367,7 @@ class TelaSobreNos extends StatelessWidget {
                 const Divider(height: 1),
                 const SizedBox(height: 12),
                 Text(
-                  dev['descricao'],
+                  dev.descricao,
                   style: const TextStyle(
                     color: Color(0xFF555555),
                     fontSize: 13,
@@ -342,9 +377,23 @@ class TelaSobreNos extends StatelessWidget {
                 const SizedBox(height: 16),
                 Row(
                   children: [
-                    Expanded(child: _linkBotao(Icons.code, "GitHub", dev['github'], _oliva)),
+                    Expanded(
+                      child: _linkBotao(
+                        Icons.code,
+                        "GitHub",
+                        dev.github,
+                        _oliva,
+                      ),
+                    ),
                     const SizedBox(width: 10),
-                    Expanded(child: _linkBotao(Icons.work_outline, "LinkedIn", dev['linkedin'], _teal)),
+                    Expanded(
+                      child: _linkBotao(
+                        Icons.work_outline,
+                        "LinkedIn",
+                        dev.linkedin,
+                        _teal,
+                      ),
+                    ),
                   ],
                 ),
               ],
@@ -368,7 +417,14 @@ class TelaSobreNos extends StatelessWidget {
         children: [
           Icon(icone, color: cor, size: 16),
           const SizedBox(width: 6),
-          Text(label, style: TextStyle(color: cor, fontWeight: FontWeight.bold, fontSize: 13)),
+          Text(
+            label,
+            style: TextStyle(
+              color: cor,
+              fontWeight: FontWeight.bold,
+              fontSize: 13,
+            ),
+          ),
         ],
       ),
     );
@@ -388,7 +444,11 @@ class TelaSobreNos extends StatelessWidget {
           SizedBox(height: 8),
           Text(
             "Desenvolvido com dedicação",
-            style: TextStyle(color: _oliva, fontWeight: FontWeight.bold, fontSize: 14),
+            style: TextStyle(
+              color: _oliva,
+              fontWeight: FontWeight.bold,
+              fontSize: 14,
+            ),
           ),
           SizedBox(height: 4),
           Text(

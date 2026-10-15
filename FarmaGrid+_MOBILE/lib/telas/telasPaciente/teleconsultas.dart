@@ -1,3 +1,5 @@
+import '../../models/medico_models.dart';
+import 'package:farmagrid/widgets/carregamento.dart';
 import 'package:flutter/material.dart';
 import '../../services/paciente_service.dart';
 import 'paciente_visual.dart';
@@ -10,7 +12,8 @@ class Teleconsultas extends StatefulWidget {
 }
 
 class _TeleconsultasState extends State<Teleconsultas> {
-  List<Map<String, dynamic>> _consultas = [], _medicos = [];
+  List<ConsultaMedica> _consultas = [];
+  List<Map<String, dynamic>> _medicos = [];
   bool _carregando = true;
   String? _erro;
 
@@ -32,19 +35,7 @@ class _TeleconsultasState extends State<Teleconsultas> {
       ]);
       if (!mounted) return;
       setState(() {
-        _consultas = (dados[0] as List)
-            .map(
-              (c) => <String, dynamic>{
-                'id': c.id,
-                'idMedico': c.idMedico,
-                'data': c.data,
-                'horario': c.horario,
-                'status': c.status,
-                'duracao': c.duracao,
-                'tipo': c.tipo,
-              },
-            )
-            .toList();
+        _consultas = dados[0] as List<ConsultaMedica>;
         _medicos = dados[1] as List<Map<String, dynamic>>;
       });
     } catch (e) {
@@ -74,8 +65,8 @@ class _TeleconsultasState extends State<Teleconsultas> {
     return 'Dr(a). $completo';
   }
 
-  bool _agendada(Map<String, dynamic> c) {
-    final status = '${c['status'] ?? ''}'.toLowerCase();
+  bool _agendada(ConsultaMedica c) {
+    final status = '${c.status}'.toLowerCase();
     return !status.contains('cancel') && !status.contains('conclu');
   }
 
@@ -113,9 +104,7 @@ class _TeleconsultasState extends State<Teleconsultas> {
 
   Widget _conteudo() {
     if (_carregando) {
-      return const Center(
-        child: CircularProgressIndicator(color: pacienteVerde),
-      );
+      return const CartaoCarregamento();
     }
     if (_erro != null) {
       return Center(
@@ -173,24 +162,36 @@ class _TeleconsultasState extends State<Teleconsultas> {
               ),
             )
           else
-            ...agendadas.map(
-              (c) => _cardConsulta(c, destaque: c == agendadas.first),
+            ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: agendadas.length,
+              itemBuilder: (context, index) {
+                return _cardConsulta(agendadas[index], destaque: index == 0);
+              },
             ),
           if (anteriores.isNotEmpty) ...[
             const SizedBox(height: 27),
             const PacienteTituloSecao('Histórico'),
             const SizedBox(height: 15),
-            ...anteriores.map((c) => _cardConsulta(c)),
+            ListView.builder(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: anteriores.length,
+              itemBuilder: (context, index) {
+                return _cardConsulta(anteriores[index]);
+              },
+            ),
           ],
         ],
       ),
     );
   }
 
-  Widget _cardConsulta(Map<String, dynamic> c, {bool destaque = false}) {
-    final medico = _medico(c['idMedico']);
+  Widget _cardConsulta(ConsultaMedica c, {bool destaque = false}) {
+    final medico = _medico(c.idMedico);
     final especialidade = '${medico?['especialidade'] ?? 'Atendimento médico'}';
-    final status = '${c['status'] ?? 'Agendada'}';
+    final status = '${c.status}';
     return PacienteCard(
       margin: const EdgeInsets.only(bottom: 14),
       child: Column(
@@ -216,7 +217,7 @@ class _TeleconsultasState extends State<Teleconsultas> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      _nomeMedico(c['idMedico']),
+                      _nomeMedico(c.idMedico),
                       style: const TextStyle(
                         color: pacienteTexto,
                         fontWeight: FontWeight.w700,
@@ -268,7 +269,7 @@ class _TeleconsultasState extends State<Teleconsultas> {
               ),
               const SizedBox(width: 6),
               Text(
-                formatarDataBrasileira('${c['data'] ?? ''}'),
+                formatarDataBrasileira('${c.data}'),
                 style: const TextStyle(color: Colors.grey, fontSize: 12),
               ),
               const SizedBox(width: 14),
@@ -279,7 +280,7 @@ class _TeleconsultasState extends State<Teleconsultas> {
               ),
               const SizedBox(width: 5),
               Text(
-                '${c['horario'] ?? ''}',
+                '${c.horario}',
                 style: const TextStyle(color: Colors.grey, fontSize: 12),
               ),
             ],

@@ -77,8 +77,15 @@ class PacienteService {
     ...dados,
     'idPaciente': idPaciente,
   });
-  static Future<List<Map<String, dynamic>>> listarFarmaciasProximas() =>
-      ApiService.getList('/api/pacientes/$idPaciente/farmacias-proximas');
+  static Future<List<FarmaciaProxima>> listarFarmaciasProximas() async {
+    final dados = await ApiService.getList(
+      '/api/pacientes/$idPaciente/farmacias-proximas',
+    );
+    return List<FarmaciaProxima>.from(
+      dados.map((f) => FarmaciaProxima.fromJson(f)),
+    );
+  }
+
   static Future<void> alterarAssinatura(
     bool premium, {
     String tipo = 'MENSAL',

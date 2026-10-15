@@ -121,6 +121,8 @@ class ProdutoPaciente {
     required this.controlado,
   });
 
+  String get precoFormatado =>
+      'R\$ ' + preco.toStringAsFixed(2).replaceAll('.', ',');
   factory ProdutoPaciente.fromJson(Map<String, dynamic> json) =>
       ProdutoPaciente(
         id: _asInt(json['id']),
@@ -163,4 +165,45 @@ class CupomPaciente {
     status: '${json['status'] ?? ''}',
     resgatado: json['resgatado'] == true,
   );
+}
+
+class FarmaciaProxima {
+  final String id, nome, endereco, horario, fonte, googleMapsUri;
+  final bool? aberto;
+  final double? distanciaMetros;
+  FarmaciaProxima.fromJson(Map<String, dynamic> json)
+    : id = (json['id'] ?? '').toString(),
+      nome = (json['nome'] ?? 'Farmácia').toString(),
+      endereco = (json['endereco'] ?? '').toString(),
+      horario = (json['horario'] ?? 'Horário não informado').toString(),
+      fonte = (json['fonte'] ?? '').toString(),
+      googleMapsUri = (json['googleMapsUri'] ?? '').toString(),
+      aberto = json['aberto'] is bool ? json['aberto'] as bool : null,
+      distanciaMetros = (json['distanciaMetros'] as num?)?.toDouble();
+}
+
+class SolicitacaoExame {
+  final int id;
+  final String? status;
+  final String? justificativa;
+  final String? exame;
+  final String? solicitadoEm;
+  SolicitacaoExame.fromJson(Map<String, dynamic> json)
+    : id = int.tryParse((json['id'] ?? 0).toString()) ?? 0,
+      status = json['status']?.toString(),
+      justificativa = json['justificativa']?.toString(),
+      exame = json['exame']?.toString(),
+      solicitadoEm = json['solicitadoEm']?.toString();
+}
+
+class ResultadoExame {
+  final int id;
+  final String? titulo;
+  final String? tipo;
+  final String? data;
+  ResultadoExame.fromJson(Map<String, dynamic> json)
+    : id = int.tryParse((json['id'] ?? 0).toString()) ?? 0,
+      titulo = json['titulo']?.toString(),
+      tipo = json['tipo']?.toString(),
+      data = json['data']?.toString();
 }

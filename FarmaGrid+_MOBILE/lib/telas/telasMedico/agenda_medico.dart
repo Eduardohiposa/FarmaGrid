@@ -1,3 +1,4 @@
+import 'package:farmagrid/widgets/carregamento.dart';
 import 'package:flutter/material.dart';
 import 'package:farmagrid/app_theme.dart';
 import '../../models/medico_models.dart';
@@ -68,7 +69,7 @@ class _TelaAgendaMedicoState extends State<TelaAgendaMedico> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   if (_carregando)
-                    const Center(child: CircularProgressIndicator())
+                    const CartaoCarregamento()
                   else if (_erro != null)
                     _estadoErro()
                   else if (_consultas.isEmpty)
@@ -85,15 +86,24 @@ class _TelaAgendaMedicoState extends State<TelaAgendaMedico> {
                       ),
                     ),
                     const SizedBox(height: 15),
-                    ..._consultas.map(
-                      (consulta) => _construirCardConsulta(
-                        consulta.nomePaciente,
-                        formatarDataBrasileira(consulta.data),
-                        consulta.horario,
-                        mostrarBotao:
-                            consulta.tipo.toLowerCase().contains('online') ||
-                            consulta.tipo.toLowerCase().contains('tele'),
-                      ),
+                    ListView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: _consultas.length,
+                      itemBuilder: (context, index) {
+                        return _construirCardConsulta(
+                          _consultas[index].nomePaciente,
+                          formatarDataBrasileira(_consultas[index].data),
+                          _consultas[index].horario,
+                          mostrarBotao:
+                              _consultas[index].tipo.toLowerCase().contains(
+                                'online',
+                              ) ||
+                              _consultas[index].tipo.toLowerCase().contains(
+                                'tele',
+                              ),
+                        );
+                      },
                     ),
                   ],
                 ],

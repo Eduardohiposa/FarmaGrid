@@ -23,7 +23,11 @@ class TelaParcerias extends StatelessWidget {
                 children: [
                   const Text(
                     "Parcerias Ativas",
-                    style: TextStyle(color: Color(0xFF2E2E2E), fontSize: 18, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      color: Color(0xFF2E2E2E),
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(height: 15),
                   _construirCardParceria(
@@ -87,12 +91,20 @@ class TelaParcerias extends StatelessWidget {
                 children: [
                   GestureDetector(
                     onTap: () => Navigator.pop(context),
-                    child: const Icon(Icons.arrow_back, color: Colors.white, size: 26),
+                    child: const Icon(
+                      Icons.arrow_back,
+                      color: Colors.white,
+                      size: 26,
+                    ),
                   ),
                   const SizedBox(width: 15),
                   const Text(
                     "Parcerias",
-                    style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ],
               ),
@@ -104,7 +116,9 @@ class TelaParcerias extends StatelessWidget {
             children: [
               Expanded(child: _cardResumoHeader("2", "Parcerias Ativas")),
               const SizedBox(width: 15),
-              Expanded(child: _cardResumoHeader("105", "Pacientes Beneficiados")),
+              Expanded(
+                child: _cardResumoHeader("105", "Pacientes Beneficiados"),
+              ),
             ],
           ),
         ],
@@ -121,9 +135,20 @@ class TelaParcerias extends StatelessWidget {
       ),
       child: Column(
         children: [
-          Text(valor, style: TextStyle(color: corVerdePrimario, fontSize: 24, fontWeight: FontWeight.bold)),
+          Text(
+            valor,
+            style: TextStyle(
+              color: corVerdePrimario,
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
           const SizedBox(height: 4),
-          Text(label, style: const TextStyle(color: Colors.grey, fontSize: 11), textAlign: TextAlign.center),
+          Text(
+            label,
+            style: const TextStyle(color: Colors.grey, fontSize: 11),
+            textAlign: TextAlign.center,
+          ),
         ],
       ),
     );
@@ -141,7 +166,13 @@ class TelaParcerias extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(22),
-        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.06), blurRadius: 15, offset: const Offset(0, 6))],
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.06),
+            blurRadius: 15,
+            offset: const Offset(0, 6),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -158,19 +189,33 @@ class TelaParcerias extends StatelessWidget {
                   ),
                 ),
                 child: Center(
-                  child: Icon(Icons.local_pharmacy_outlined, size: 48, color: corTealBotao.withValues(alpha: 0.5)),
+                  child: Icon(
+                    Icons.local_pharmacy_outlined,
+                    size: 48,
+                    color: corTealBotao.withValues(alpha: 0.5),
+                  ),
                 ),
               ),
               Positioned(
                 top: 10,
                 right: 12,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 5,
+                  ),
                   decoration: BoxDecoration(
                     color: corVerdePrimario,
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: Text(desconto, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12)),
+                  child: Text(
+                    desconto,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 12,
+                    ),
+                  ),
                 ),
               ),
             ],
@@ -185,47 +230,96 @@ class TelaParcerias extends StatelessWidget {
                     Container(
                       width: 12,
                       height: 12,
-                      decoration: BoxDecoration(color: corVerdePrimario, shape: BoxShape.circle),
+                      decoration: BoxDecoration(
+                        color: corVerdePrimario,
+                        shape: BoxShape.circle,
+                      ),
                     ),
                     const SizedBox(width: 8),
-                    Text(nome, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Color(0xFF2E2E2E))),
+                    Text(
+                      nome,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 15,
+                        color: Color(0xFF2E2E2E),
+                      ),
+                    ),
                     const SizedBox(width: 8),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 3,
+                      ),
                       decoration: BoxDecoration(
                         color: corTealBotao.withValues(alpha: 0.2),
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: Text(tipo, style: TextStyle(color: corVerdeOliva, fontSize: 10, fontWeight: FontWeight.w600)),
+                      child: Text(
+                        tipo,
+                        style: TextStyle(
+                          color: corVerdeOliva,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
                     ),
                   ],
                 ),
                 const SizedBox(height: 4),
-                Text(desde, style: TextStyle(color: Colors.grey[400], fontSize: 12)),
+                Text(
+                  desde,
+                  style: TextStyle(color: Colors.grey[400], fontSize: 12),
+                ),
                 const SizedBox(height: 14),
                 const Text(
                   "Benefícios:",
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF2E2E2E)),
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
+                    color: Color(0xFF2E2E2E),
+                  ),
                 ),
                 const SizedBox(height: 8),
-                ...beneficios.map((b) => Padding(
+                ListView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: beneficios.length,
+                  itemBuilder: (context, index) {
+                    return Padding(
                       padding: const EdgeInsets.only(bottom: 5),
                       child: Row(
                         children: [
                           Icon(Icons.check, size: 14, color: corVerdePrimario),
                           const SizedBox(width: 6),
-                          Text(b, style: const TextStyle(color: Colors.grey, fontSize: 12)),
+                          Expanded(
+                            child: Text(
+                              beneficios[index],
+                              style: const TextStyle(
+                                color: Colors.grey,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ),
                         ],
                       ),
-                    )),
+                    );
+                  },
+                ),
                 const SizedBox(height: 12),
                 const Divider(),
                 const SizedBox(height: 8),
                 Row(
                   children: [
-                    Icon(Icons.people_outline, size: 16, color: Colors.grey[400]),
+                    Icon(
+                      Icons.people_outline,
+                      size: 16,
+                      color: Colors.grey[400],
+                    ),
                     const SizedBox(width: 6),
-                    Text(pacientes, style: TextStyle(color: Colors.grey[500], fontSize: 12)),
+                    Text(
+                      pacientes,
+                      style: TextStyle(color: Colors.grey[500], fontSize: 12),
+                    ),
                   ],
                 ),
               ],

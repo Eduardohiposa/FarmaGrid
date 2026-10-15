@@ -1,3 +1,5 @@
+import '../../models/paciente_models.dart';
+import 'package:farmagrid/widgets/carregamento.dart';
 import 'package:flutter/material.dart';
 import '../../services/paciente_service.dart';
 import 'paciente_visual.dart';
@@ -10,7 +12,7 @@ class TelaFarmaciasProximas extends StatefulWidget {
 
 class _TelaFarmaciasProximasState extends State<TelaFarmaciasProximas> {
   final _busca = TextEditingController();
-  List<Map<String, dynamic>> _farmacias = [];
+  List<FarmaciaProxima> _farmacias = [];
   bool _carregando = true;
   String? _erro;
   String _filtro = 'todas';
@@ -36,11 +38,11 @@ class _TelaFarmaciasProximasState extends State<TelaFarmaciasProximas> {
     }
   }
 
-  List<Map<String, dynamic>> get _filtradas => _farmacias.where((f) {
-    final buscaOk = '${f['nome'] ?? ''} ${f['endereco'] ?? ''}'
-        .toLowerCase()
-        .contains(_busca.text.trim().toLowerCase());
-    final aberto = f['aberto'];
+  List<FarmaciaProxima> get _filtradas => _farmacias.where((f) {
+    final buscaOk = '${f.nome} ${f.endereco}'.toLowerCase().contains(
+      _busca.text.trim().toLowerCase(),
+    );
+    final aberto = f.aberto;
     return buscaOk &&
         (_filtro == 'todas' ||
             (_filtro == 'abertas' && aberto == true) ||
@@ -60,7 +62,7 @@ class _TelaFarmaciasProximasState extends State<TelaFarmaciasProximas> {
       children: [
         PacienteCabecalho(
           titulo: 'Farmácias próximas',
-          subtitulo: 'Resultados próximos ao endereço do seu cadastro',
+          subtitulo: 'Busca na região do CEP e endereço cadastrado',
           rodape: TextField(
             controller: _busca,
             onChanged: (_) => setState(() {}),
@@ -103,9 +105,7 @@ class _TelaFarmaciasProximasState extends State<TelaFarmaciasProximas> {
         if (_carregando)
           const Padding(
             padding: EdgeInsets.only(top: 120),
-            child: Center(
-              child: CircularProgressIndicator(color: pacienteVerde),
-            ),
+            child: CartaoCarregamento(),
           )
         else if (_erro != null)
           _mensagem(
@@ -130,7 +130,14 @@ class _TelaFarmaciasProximasState extends State<TelaFarmaciasProximas> {
             ],
           ),
           const SizedBox(height: 14),
-          ..._filtradas.map(_cardFarmacia),
+          ListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: _filtradas.length,
+            itemBuilder: (context, index) {
+              return _cardFarmacia(_filtradas[index]);
+            },
+          ),
           const SizedBox(height: 5),
           _fonteDados(),
         ],
@@ -183,8 +190,8 @@ class _TelaFarmaciasProximasState extends State<TelaFarmaciasProximas> {
     );
   }
 
-  Widget _cardFarmacia(Map<String, dynamic> farmacia) {
-    final aberto = farmacia['aberto'];
+  Widget _cardFarmacia(FarmaciaProxima farmacia) {
+    final aberto = farmacia.aberto;
     final Color statusCor = aberto == true
         ? pacienteVerdeEscuro
         : aberto == false
@@ -194,8 +201,8 @@ class _TelaFarmaciasProximasState extends State<TelaFarmaciasProximas> {
         ? 'Aberta agora'
         : aberto == false
         ? 'Fechada agora'
-        : '${farmacia['horario'] ?? 'Horário não informado'}';
-    final String fonte = '${farmacia['fonte'] ?? ''}';
+        : '${farmacia.horario}';
+    final String fonte = '${farmacia.fonte}';
     return PacienteCard(
       margin: const EdgeInsets.only(bottom: 14),
       child: Column(
@@ -222,7 +229,7 @@ class _TelaFarmaciasProximasState extends State<TelaFarmaciasProximas> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      '${farmacia['nome'] ?? 'Farmácia'}',
+                      '${farmacia.nome}',
                       style: const TextStyle(
                         color: pacienteTexto,
                         fontWeight: FontWeight.w700,
@@ -231,7 +238,7 @@ class _TelaFarmaciasProximasState extends State<TelaFarmaciasProximas> {
                     ),
                     const SizedBox(height: 5),
                     Text(
-                      '${farmacia['endereco'] ?? 'Endereço não informado'}',
+                      '${farmacia.endereco}',
                       style: const TextStyle(
                         color: Colors.grey,
                         fontSize: 12,
@@ -243,6 +250,17 @@ class _TelaFarmaciasProximasState extends State<TelaFarmaciasProximas> {
               ),
             ],
           ),
+          if (farmacia.distanciaMetros != null) ...[
+            const SizedBox(height: 10),
+            Text(
+              'Aproximadamente ' +
+                  (farmacia.distanciaMetros! / 1000)
+                      .toStringAsFixed(1)
+                      .replaceAll('.', ',') +
+                  ' km da região do cadastro',
+              style: const TextStyle(color: Colors.grey, fontSize: 11),
+            ),
+          ],
           const SizedBox(height: 14),
           Container(height: 1, color: const Color(0xFFF0F0F0)),
           const SizedBox(height: 12),
@@ -290,7 +308,7 @@ class _TelaFarmaciasProximasState extends State<TelaFarmaciasProximas> {
   }
 
   Widget _fonteDados() {
-    final osm = _farmacias.any((f) => f['fonte'] == 'OpenStreetMap');
+    final osm = _farmacias.any((f) => f.fonte == 'OpenStreetMap');
     return PacienteCard(
       color: const Color(0xFFEAF5EF),
       child: Row(
@@ -305,7 +323,7 @@ class _TelaFarmaciasProximasState extends State<TelaFarmaciasProximas> {
           Expanded(
             child: Text(
               osm
-                  ? 'Resultados do OpenStreetMap. Os horários aparecem quando cadastrados pelo estabelecimento.'
+                  ? '© OpenStreetMap contributors (ODbL). Busca em até 10 km do endereço cadastrado. Horários podem não estar disponíveis.'
                   : 'Resultados e horários consultados pelo Google Places.',
               style: const TextStyle(
                 color: Color(0xFF557068),

@@ -1,3 +1,4 @@
+import '../widgets/carregamento.dart';
 import 'package:flutter/material.dart';
 import 'login.dart';
 import '../services/auth_service.dart';
@@ -220,7 +221,11 @@ class _TelaCadastroPacienteState extends State<TelaCadastroPaciente> {
 
     try {
       final url = Uri.parse('https://viacep.com.br/ws/$cep/json/');
-      final response = await http.get(url);
+      final response = await Carregamento.executar(
+        'Consultando CEP...',
+        () => http.get(url).timeout(const Duration(seconds: 15)),
+      );
+      if (!mounted) return;
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
@@ -240,6 +245,7 @@ class _TelaCadastroPacienteState extends State<TelaCadastroPaciente> {
         _alertaErro('Erro ao consultar o CEP.');
       }
     } catch (e) {
+      if (!mounted) return;
       _alertaErro('Não foi possível consultar o CEP.');
     }
   }

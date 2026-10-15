@@ -1,3 +1,4 @@
+import 'widgets/carregamento.dart';
 import 'package:farmagrid/telas/login.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -24,6 +25,8 @@ class MyApp extends StatelessWidget {
       locale: const Locale('pt', 'BR'),
       supportedLocales: const [Locale('pt', 'BR')],
       localizationsDelegates: GlobalMaterialLocalizations.delegates,
+      builder: (context, child) =>
+          CamadaCarregamento(child: child ?? const SizedBox.shrink()),
       home: _TelaInicial(
         restaurarSessao: restaurarSessao ?? AuthService.restaurarSessao,
       ),
@@ -77,7 +80,7 @@ class _TelaInicialState extends State<_TelaInicial> {
       builder: (context, snapshot) {
         if (snapshot.connectionState != ConnectionState.done) {
           return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
+            body: CartaoCarregamento(mensagem: 'Preparando seu acesso...'),
           );
         }
 
