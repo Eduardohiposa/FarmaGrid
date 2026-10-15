@@ -33,6 +33,7 @@ flutter:
 
   assets:
     - assets/images/logo.png
+    - assets/images/senhaEsquecida.jpeg
     - assets/images/medicamentos.png
     - assets/images/carol.jpeg
     - assets/images/aires.jpeg

@@ -48,6 +48,10 @@ class ApiService {
           ? 'Buscando farmácias...'
           : 'Carregando...';
     }
+    if (path == '/auth/recuperacao/solicitar') return 'Enviando código...';
+    if (path == '/auth/recuperacao/validar-codigo')
+      return 'Validando código...';
+    if (path == '/auth/recuperacao/redefinir') return 'Redefinindo senha...';
     if (method == 'DELETE') return 'Removendo...';
     if (path.contains('resgatar')) return 'Resgatando cupom...';
     if (path.contains('/senha')) return 'Atualizando senha...';

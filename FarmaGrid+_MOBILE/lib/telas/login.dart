@@ -1,3 +1,4 @@
+import 'recuperar_senha.dart';
 import 'package:flutter/material.dart';
 import 'selecaoCadastro.dart';
 import 'sobreNos.dart';
@@ -55,9 +56,7 @@ class _TelaLoginState extends State<TelaLogin> {
 
       try {
         await PerfilService.carregar(atualizar: true);
-      } catch (_) {
-        // O resumo pode ser recuperado novamente pela tela inicial.
-      }
+      } catch (_) {}
 
       if (!mounted) {
         return;
@@ -124,6 +123,21 @@ class _TelaLoginState extends State<TelaLogin> {
         });
       }
     }
+  }
+
+  Future<void> _abrirRecuperacao() async {
+    final email = await Navigator.push<String>(
+      context,
+      MaterialPageRoute(
+        builder: (_) =>
+            TelaRecuperarSenha(emailInicial: _emailCtrl.text.trim()),
+      ),
+    );
+    if (!mounted || email == null) return;
+    setState(() {
+      _emailCtrl.text = email;
+      _senhaCtrl.clear();
+    });
   }
 
   void _mostrarErro(String mensagem) {
@@ -333,6 +347,19 @@ class _TelaLoginState extends State<TelaLogin> {
                           ),
                         ),
 
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: TextButton(
+                            onPressed: _carregando ? null : _abrirRecuperacao,
+                            child: const Text(
+                              'Esqueceu sua senha?',
+                              style: TextStyle(
+                                color: corVerdeEscuro,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ),
                         const SizedBox(height: 6),
                         const Text(
                           "Entrar como:",
@@ -495,4 +522,3 @@ class _TelaLoginState extends State<TelaLogin> {
     );
   }
 }
-
