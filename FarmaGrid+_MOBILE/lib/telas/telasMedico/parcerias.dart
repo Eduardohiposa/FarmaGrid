@@ -281,6 +281,8 @@ class TelaParcerias extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 ListView.builder(
+                  padding: EdgeInsets.zero,
+                  primary: false,
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   itemCount: beneficios.length,

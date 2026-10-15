@@ -163,6 +163,8 @@ class _TeleconsultasState extends State<Teleconsultas> {
             )
           else
             ListView.builder(
+              padding: EdgeInsets.zero,
+              primary: false,
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               itemCount: agendadas.length,
@@ -175,6 +177,8 @@ class _TeleconsultasState extends State<Teleconsultas> {
             const PacienteTituloSecao('Histórico'),
             const SizedBox(height: 15),
             ListView.builder(
+              padding: EdgeInsets.zero,
+              primary: false,
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               itemCount: anteriores.length,

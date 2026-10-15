@@ -75,6 +75,8 @@ class TelaSobreNos extends StatelessWidget {
                   ),
                   const SizedBox(height: 20),
                   ListView.builder(
+                    padding: EdgeInsets.zero,
+                    primary: false,
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
                     itemCount: _devs.length,

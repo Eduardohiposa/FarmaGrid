@@ -103,6 +103,8 @@ class _TelaProntuariosState extends State<TelaProntuarios> {
                     )
                   else
                     ListView.builder(
+                      padding: EdgeInsets.zero,
+                      primary: false,
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
                       itemCount: _pacientesFiltrados.length,

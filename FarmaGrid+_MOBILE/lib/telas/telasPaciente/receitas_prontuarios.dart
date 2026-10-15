@@ -218,6 +218,8 @@ class _TelaReceitasProntuariosState extends State<TelaReceitasProntuarios> {
       if (_receitas.isEmpty)
         return const Center(child: Text('Nenhuma receita encontrada.'));
       return ListView.builder(
+        padding: EdgeInsets.zero,
+        primary: false,
         shrinkWrap: true,
         physics: const NeverScrollableScrollPhysics(),
         itemCount: _receitas.length,
@@ -229,6 +231,8 @@ class _TelaReceitasProntuariosState extends State<TelaReceitasProntuarios> {
     if (_prontuarios.isEmpty)
       return const Center(child: Text('Nenhum prontuário encontrado.'));
     return ListView.builder(
+      padding: EdgeInsets.zero,
+      primary: false,
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
       itemCount: _prontuarios.length,
@@ -240,6 +244,7 @@ class _TelaReceitasProntuariosState extends State<TelaReceitasProntuarios> {
 
   Widget _cardReceita(ReceitaPaciente receita) {
     return Container(
+      margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.white,
@@ -261,17 +266,22 @@ class _TelaReceitasProntuariosState extends State<TelaReceitasProntuarios> {
                 child: Icon(Icons.medication, color: corVerdePrimario),
               ),
               const SizedBox(width: 12),
-              const Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "Receita médica",
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-                  ),
-                  Text("FarmaGrid+", style: TextStyle(color: Colors.grey)),
-                ],
+              const Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Receita médica",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                      ),
+                    ),
+                    Text("FarmaGrid+", style: TextStyle(color: Colors.grey)),
+                  ],
+                ),
               ),
-              const Spacer(),
+              const SizedBox(width: 8),
               _tagAtiva(receita.status),
             ],
           ),
@@ -302,6 +312,7 @@ class _TelaReceitasProntuariosState extends State<TelaReceitasProntuarios> {
 
   Widget _cardProntuario(ProntuarioPaciente prontuario) {
     return Container(
+      margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: Colors.white,

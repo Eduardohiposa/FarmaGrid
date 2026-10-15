@@ -47,6 +47,7 @@ class _TelaConfiguracoesPacienteState extends State<TelaConfiguracoesPaciente> {
   late final TextEditingController _bairroCtrl;
   late final TextEditingController _cidadeCtrl;
   late final TextEditingController _cepCtrl;
+  final _estadoCtrl = TextEditingController();
   final _planoCtrl = TextEditingController();
   final _contatoEmerNomeCtrl = TextEditingController();
   final _contatoEmerTelCtrl = TextEditingController();
@@ -271,6 +272,7 @@ class _TelaConfiguracoesPacienteState extends State<TelaConfiguracoesPaciente> {
       _numeroCtrl.text = '${_perfil['numCasa'] ?? ''}';
       _bairroCtrl.text = '${_perfil['bairro'] ?? ''}';
       _cidadeCtrl.text = '${_perfil['cidade'] ?? ''}';
+      _estadoCtrl.text = (_perfil['estado'] ?? '').toString();
       _cepCtrl.text = '${_perfil['cep'] ?? ''}';
       _planoCtrl.text = '${_perfil['planoSaude'] ?? ''}';
       _contatoEmerNomeCtrl.text = '${_perfil['contatoEmergenciaNome'] ?? ''}';
@@ -319,7 +321,7 @@ class _TelaConfiguracoesPacienteState extends State<TelaConfiguracoesPaciente> {
         'numCasa': int.tryParse(_numeroCtrl.text),
         'bairro': _bairroCtrl.text.trim(),
         'cidade': _cidadeCtrl.text.trim(),
-        'estado': _perfil['estado'],
+        'estado': _estadoCtrl.text.trim().toUpperCase(),
         'cep': _cepCtrl.text.trim(),
         'tipoSanguineo': _tipoSanguineo,
         'planoSaude': _planoCtrl.text.trim(),
@@ -463,6 +465,7 @@ class _TelaConfiguracoesPacienteState extends State<TelaConfiguracoesPaciente> {
       _bairroCtrl,
       _cidadeCtrl,
       _cepCtrl,
+      _estadoCtrl,
       _planoCtrl,
       _contatoEmerNomeCtrl,
       _contatoEmerTelCtrl,
@@ -791,6 +794,8 @@ class _TelaConfiguracoesPacienteState extends State<TelaConfiguracoesPaciente> {
                 ),
                 const SizedBox(height: 12),
                 _campo('Bairro:', _bairroCtrl, _modoEdicao),
+                const SizedBox(height: 12),
+                _campo('Estado (UF):', _estadoCtrl, _modoEdicao),
                 const SizedBox(height: 12),
                 Row(
                   children: [
@@ -1311,6 +1316,8 @@ class _TelaConfiguracoesPacienteState extends State<TelaConfiguracoesPaciente> {
             child: Column(
               children: [
                 ListView.builder(
+                  padding: EdgeInsets.zero,
+                  primary: false,
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   itemCount: _dependentes.length,

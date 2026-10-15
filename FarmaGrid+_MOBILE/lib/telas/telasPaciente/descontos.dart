@@ -93,6 +93,8 @@ class _TelaDescontosState extends State<TelaDescontos> {
                     const Center(child: Text('Nenhum desconto disponível.'))
                   else
                     ListView.builder(
+                      padding: EdgeInsets.zero,
+                      primary: false,
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
                       itemCount: _cupons.length,

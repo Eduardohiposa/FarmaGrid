@@ -10,9 +10,12 @@ import java.nio.charset.StandardCharsets;
 import java.net.http.*;
 import java.time.Duration;
 import java.util.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Service
 public class GooglePlacesService {
+    private static final Logger log = LoggerFactory.getLogger(GooglePlacesService.class);
     @Value("${google.places.api-key:}") private String apiKey;
     @Value("${farmacias.google-url:https://places.googleapis.com/v1/places:searchText}")
     private String googleUrl = "https://places.googleapis.com/v1/places:searchText";
@@ -20,13 +23,15 @@ public class GooglePlacesService {
     private String geocodingUrl = "https://nominatim.openstreetmap.org/search";
     @Value("${farmacias.overpass-urls:https://overpass-api.de/api/interpreter,https://overpass.private.coffee/api/interpreter}")
     private String overpassUrls = "https://overpass-api.de/api/interpreter,https://overpass.private.coffee/api/interpreter";
+    @Value("${farmacias.poi-url:https://nominatim.openstreetmap.org/search}")
+    private String poiUrl = "https://nominatim.openstreetmap.org/search";
     private final ObjectMapper mapper = new ObjectMapper();
     private final HttpClient client = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(5)).build();
     private final Map<String, Cache> cache = new LinkedHashMap<>();
     private long ultimaGeocodificacao;
     private record Cache(long instante, List<Map<String, Object>> dados) {}
 
-    // Serializa consultas, limita o Nominatim a 1/s e reaproveita resultados por 10 minutos.
+    // Serializa consultas, limita o Nominatim a 1/s e reaproveita resultados por 5 minutos.
     public synchronized List<Map<String, Object>> buscarFarmacias(String endereco) throws Exception {
         if (endereco == null || endereco.isBlank()) throw new IllegalStateException("Complete seu endereço nas configurações.");
         String chave = endereco.trim().toLowerCase(Locale.ROOT);
@@ -82,10 +87,18 @@ public class GooglePlacesService {
     private List<Map<String, Object>> buscarOpenStreetMap(String endereco) throws Exception {
         JsonNode geo = geocodificar(endereco);
         double lat = geo.path("lat").asDouble(), lon = geo.path("lon").asDouble();
-        String consulta = "[out:json][timeout:15];(nwr[amenity=pharmacy](around:10000,"
-            + lat + "," + lon + ");nwr[shop=chemist](around:10000," + lat + "," + lon + "););out center tags;";
+        String consulta = "[out:json][timeout:15];nwr[amenity=pharmacy](around:10000,"
+            + lat + "," + lon + ");out center tags;";
         JsonNode elementos = null;
-        for (String endpoint : overpassUrls.split(",")) {
+        try {
+            elementos = buscarFarmaciasNominatim(lat, lon);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw e;
+        } catch (Exception e) {
+            log.warn("Busca de farmácias Nominatim indisponível: {}", e.getClass().getSimpleName());
+        }
+        if (elementos == null) for (String endpoint : overpassUrls.split(",")) {
             try {
                 JsonNode resposta = consultar(requisicao(endpoint.trim(), 20)
                     .header("Content-Type", "application/x-www-form-urlencoded")
@@ -98,7 +111,7 @@ public class GooglePlacesService {
                 Thread.currentThread().interrupt();
                 throw e;
             } catch (Exception e) {
-                // Tenta a próxima instância antes de informar indisponibilidade.
+                log.warn("Overpass indisponível: host={}, falha={}", URI.create(endpoint.trim()).getHost(), e.getMessage());
             }
         }
         if (elementos == null) throw new IllegalStateException("O serviço de farmácias está indisponível. Tente novamente em alguns instantes.");
@@ -134,6 +147,49 @@ public class GooglePlacesService {
         return new ArrayList<>(result.subList(0, Math.min(15, result.size())));
     }
 
+    private void aguardarNominatim() throws InterruptedException {
+        long esperar = 1100 - (System.currentTimeMillis() - ultimaGeocodificacao);
+        if (esperar > 0) Thread.sleep(esperar);
+        ultimaGeocodificacao = System.currentTimeMillis();
+    }
+
+    // Busca interativa de até 15 resultados; não enumera todos os POIs da região.
+    private JsonNode buscarFarmaciasNominatim(double lat, double lon) throws Exception {
+        aguardarNominatim();
+        double deltaLat = 10_000 / 111_320.0;
+        double deltaLon = deltaLat / Math.cos(Math.toRadians(lat));
+        String caixa = (lon - deltaLon) + "," + (lat - deltaLat) + ","
+            + (lon + deltaLon) + "," + (lat + deltaLat);
+        String separador = poiUrl.contains("?") ? "&" : "?";
+        JsonNode resposta = consultar(requisicao(poiUrl + separador
+            + "format=jsonv2&q=%5Bpharmacy%5D&bounded=1&limit=15&countrycodes=br"
+            + "&addressdetails=1&extratags=1&viewbox=" + URLEncoder.encode(caixa, StandardCharsets.UTF_8), 10).GET().build());
+        if (!resposta.isArray()) throw new IllegalStateException("Resposta de farmácias inválida.");
+        var elementos = mapper.createArrayNode();
+        for (JsonNode ponto : resposta) {
+            double latitude = ponto.path("lat").asDouble(Double.NaN);
+            double longitude = ponto.path("lon").asDouble(Double.NaN);
+            if (!"pharmacy".equals(ponto.path("type").asText()) || !Double.isFinite(latitude)
+                    || !Double.isFinite(longitude) || Math.abs(latitude) > 90 || Math.abs(longitude) > 180) {
+                throw new IllegalStateException("Resposta de farmácias inválida.");
+            }
+            var elemento = mapper.createObjectNode();
+            elemento.put("type", ponto.path("osm_type").asText("node"));
+            elemento.put("id", ponto.path("osm_id").asText(ponto.path("place_id").asText()));
+            elemento.put("lat", latitude); elemento.put("lon", longitude);
+            var tags = elemento.putObject("tags");
+            tags.put("name", ponto.path("name").asText(ponto.path("display_name").asText("Farmácia").split(",")[0]));
+            tags.put("opening_hours", ponto.path("extratags").path("opening_hours").asText(""));
+            JsonNode endereco = ponto.path("address");
+            tags.put("addr:street", endereco.path("road").asText());
+            tags.put("addr:housenumber", endereco.path("house_number").asText());
+            tags.put("addr:suburb", endereco.path("suburb").asText(endereco.path("neighbourhood").asText()));
+            tags.put("addr:city", endereco.path("city").asText(endereco.path("town").asText()));
+            elementos.add(elemento);
+        }
+        return elementos;
+    }
+
     private JsonNode geocodificar(String endereco) throws Exception {
         List<String> partes = Arrays.stream(endereco.split(",")).map(String::trim).filter(v -> !v.isBlank()).toList();
         LinkedHashSet<String> consultas = new LinkedHashSet<>();
@@ -146,9 +202,7 @@ public class GooglePlacesService {
         if (consultas.isEmpty()) consultas.add(endereco);
         boolean respondeu = false;
         for (String consulta : consultas) {
-            long esperar = 1100 - (System.currentTimeMillis() - ultimaGeocodificacao);
-            if (esperar > 0) Thread.sleep(esperar);
-            ultimaGeocodificacao = System.currentTimeMillis();
+            aguardarNominatim();
             try {
                 String separador = geocodingUrl.contains("?") ? "&" : "?";
                 JsonNode resposta = consultar(requisicao(geocodingUrl + separador
@@ -176,7 +230,7 @@ public class GooglePlacesService {
 
     private JsonNode consultar(HttpRequest request) throws Exception {
         HttpResponse<String> resposta = client.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
-        if (resposta.statusCode() / 100 != 2) throw new IllegalStateException("Provedor temporariamente indisponível.");
+        if (resposta.statusCode() / 100 != 2) throw new IllegalStateException("Provedor temporariamente indisponível (HTTP " + resposta.statusCode() + ").");
         return mapper.readTree(resposta.body());
     }
 

@@ -217,6 +217,8 @@ class _TelaDetalhesPacienteState extends State<TelaDetalhesPaciente> {
             ),
             const SizedBox(height: 15),
             ListView.builder(
+              padding: EdgeInsets.zero,
+              primary: false,
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               itemCount: _registros.length,

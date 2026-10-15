@@ -87,6 +87,8 @@ class _TelaAgendaMedicoState extends State<TelaAgendaMedico> {
                     ),
                     const SizedBox(height: 15),
                     ListView.builder(
+                      padding: EdgeInsets.zero,
+                      primary: false,
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
                       itemCount: _consultas.length,

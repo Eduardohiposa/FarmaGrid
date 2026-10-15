@@ -211,9 +211,9 @@ class _TelaRecuperarSenhaState extends State<TelaRecuperarSenha> {
     super.dispose();
   }
 
-  InputDecoration _decoracao(String label, IconData icon) => InputDecoration(
+  InputDecoration _decoracao(String label, IconData? icon) => InputDecoration(
     labelText: label,
-    prefixIcon: Icon(icon, color: _escuro),
+    prefixIcon: icon == null ? null : Icon(icon, color: _escuro),
     filled: true,
     fillColor: const Color(0xFFF0F7F0),
     border: OutlineInputBorder(
@@ -456,11 +456,8 @@ class _TelaRecuperarSenhaState extends State<TelaRecuperarSenha> {
                                               fontWeight: FontWeight.w700,
                                               color: _escuro,
                                             ),
-                                            decoration:
-                                                _decoracao(
-                                                  '',
-                                                  Icons.numbers,
-                                                ).copyWith(
+                                            decoration: _decoracao('', null)
+                                                .copyWith(
                                                   labelText: null,
                                                   prefixIcon: null,
                                                   contentPadding:

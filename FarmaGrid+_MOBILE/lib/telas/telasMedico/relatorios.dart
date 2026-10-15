@@ -160,6 +160,8 @@ class _TelaRelatoriosState extends State<TelaRelatorios> {
                     style: TextStyle(color: Colors.grey),
                   )
                 : ListView.builder(
+                    padding: EdgeInsets.zero,
+                    primary: false,
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
                     itemCount: tiposVisiveis.length,

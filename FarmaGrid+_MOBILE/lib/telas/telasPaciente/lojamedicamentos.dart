@@ -442,6 +442,8 @@ class _TelaMedicamentosState extends State<TelaMedicamentos> {
                         ),
                         const SizedBox(height: 20),
                         ListView.builder(
+                          padding: EdgeInsets.zero,
+                          primary: false,
                           shrinkWrap: true,
                           physics: const NeverScrollableScrollPhysics(),
                           itemCount: lista.length,

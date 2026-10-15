@@ -33,6 +33,7 @@ void main() {
           expect(find.text('Etapa 1 de 3 · E-mail'), findsOneWidget);
           await tocar(tester, 'Enviar código');
           expect(find.text('Etapa 2 de 3 · Código'), findsOneWidget);
+          expect(find.byIcon(Icons.numbers), findsNothing);
           final reenvio = tester.widget<TextButton>(
             find.widgetWithText(TextButton, 'Reenviar código em 60s'),
           );

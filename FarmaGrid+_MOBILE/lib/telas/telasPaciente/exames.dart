@@ -154,6 +154,8 @@ class _TelaExamesState extends State<TelaExames> {
               ),
               const SizedBox(height: 15),
               ListView.builder(
+                padding: EdgeInsets.zero,
+                primary: false,
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 itemCount: _solicitacoes.length,
@@ -300,6 +302,8 @@ class _TelaExamesState extends State<TelaExames> {
               ),
               const SizedBox(height: 15),
               ListView.builder(
+                padding: EdgeInsets.zero,
+                primary: false,
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 itemCount: _resultados.length,
