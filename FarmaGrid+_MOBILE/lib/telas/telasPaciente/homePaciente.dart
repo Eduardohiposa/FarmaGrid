@@ -1,4 +1,3 @@
-import 'package:farmagrid/app_theme.dart';
 import 'package:farmagrid/telas/telasPaciente/descontos.dart';
 import 'package:farmagrid/telas/telasPaciente/exames.dart';
 import 'package:farmagrid/telas/telasPaciente/farmaciasprox.dart';
@@ -24,14 +23,12 @@ class _TelaHomePacienteState extends State<TelaHomePaciente> {
   final Color corVerdeOliva = const Color(0xFF136A48);
   final Color corTealBotao = const Color(0xFF7FC6BB);
 
-  final _themeCtrl = AppThemeController();
   PacientePerfil? _perfil;
   ConsultaMedica? _proximaConsulta;
 
   @override
   void initState() {
     super.initState();
-    _themeCtrl.addListener(_atualizarTema);
     _carregarResumo();
   }
 
@@ -53,21 +50,14 @@ class _TelaHomePacienteState extends State<TelaHomePaciente> {
     }
   }
 
-  void _atualizarTema() => setState(() {});
-
   @override
   void dispose() {
-    _themeCtrl.removeListener(_atualizarTema);
     super.dispose();
   }
 
-  Color get corFundo => _themeCtrl.darkMode
-      ? const Color(0xFF121212)
-      : const Color.fromARGB(255, 245, 245, 245);
-  Color get corCard =>
-      _themeCtrl.darkMode ? const Color(0xFF1E1E1E) : Colors.white;
-  Color get corTexto =>
-      _themeCtrl.darkMode ? Colors.white : const Color(0xFF2E2E2E);
+  Color get corFundo => const Color.fromARGB(255, 245, 245, 245);
+  Color get corCard => Colors.white;
+  Color get corTexto => const Color(0xFF2E2E2E);
 
   Future<void> _abrirPerfil() async {
     try {
@@ -79,7 +69,6 @@ class _TelaHomePacienteState extends State<TelaHomePaciente> {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (_) => DrawerPaciente(
-        themeCtrl: _themeCtrl,
         corVerde: corVerdePrimario,
         corOliva: corVerdeOliva,
         corTeal: corTealBotao,

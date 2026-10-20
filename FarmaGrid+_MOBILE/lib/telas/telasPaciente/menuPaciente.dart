@@ -1,4 +1,3 @@
-import 'package:farmagrid/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:farmagrid/telas/telasPaciente/configuracoesPaciente.dart';
 import 'package:farmagrid/telas/sobreNos.dart';
@@ -7,12 +6,10 @@ import '../../services/auth_service.dart';
 import '../login.dart';
 
 class DrawerPaciente extends StatelessWidget {
-  final AppThemeController themeCtrl;
   final Color corVerde, corOliva, corTeal, corCard, corTexto;
 
   const DrawerPaciente({
     super.key,
-    required this.themeCtrl,
     required this.corVerde,
     required this.corOliva,
     required this.corTeal,
@@ -40,9 +37,8 @@ class DrawerPaciente extends StatelessWidget {
   Widget build(BuildContext context) {
     final perfil = PerfilService.atual.value;
     final foto = PerfilService.foto(perfil);
-    final isDark = themeCtrl.darkMode;
-    final bgColor = isDark ? const Color(0xFF1A1A1A) : Colors.white;
-    final subColor = isDark ? Colors.white60 : Colors.grey;
+    const bgColor = Colors.white;
+    const subColor = Colors.grey;
 
     return DraggableScrollableSheet(
       initialChildSize: 0.88,
@@ -131,7 +127,6 @@ class DrawerPaciente extends StatelessWidget {
                     "Consultas",
                     Icons.calendar_today_outlined,
                     corVerde,
-                    isDark,
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -141,7 +136,6 @@ class DrawerPaciente extends StatelessWidget {
                     "Exames",
                     Icons.science_outlined,
                     corTeal,
-                    isDark,
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -151,7 +145,6 @@ class DrawerPaciente extends StatelessWidget {
                     "Receitas",
                     Icons.history_edu_outlined,
                     corOliva,
-                    isDark,
                   ),
                 ),
               ],
@@ -163,7 +156,6 @@ class DrawerPaciente extends StatelessWidget {
               "Meu Perfil",
               "Editar dados pessoais",
               corVerde,
-              isDark,
               () => _navegarParaAba(context, 0),
             ),
             _item(
@@ -171,7 +163,6 @@ class DrawerPaciente extends StatelessWidget {
               "Pagamento",
               "Cartões e assinaturas",
               corVerde,
-              isDark,
               () => _navegarParaAba(context, 3),
             ),
             _item(
@@ -179,7 +170,6 @@ class DrawerPaciente extends StatelessWidget {
               "Plano de Saúde",
               "Dados do convênio",
               corVerde,
-              isDark,
               () => _navegarParaAba(context, 1),
             ),
             _item(
@@ -187,7 +177,6 @@ class DrawerPaciente extends StatelessWidget {
               "Dependentes",
               "Gerenciar dependentes",
               corVerde,
-              isDark,
               () => _navegarParaAba(context, 4),
             ),
             const SizedBox(height: 20),
@@ -197,7 +186,6 @@ class DrawerPaciente extends StatelessWidget {
               "Privacidade",
               "Dados e permissões",
               corVerde,
-              isDark,
               () => _navegarParaAba(context, 2),
             ),
             const SizedBox(height: 20),
@@ -207,7 +195,6 @@ class DrawerPaciente extends StatelessWidget {
               "Sobre Nós",
               "Conheça a equipe",
               corVerde,
-              isDark,
               () => _navegarPara(context, const TelaSobreNos()),
             ),
             const SizedBox(height: 24),
@@ -271,12 +258,11 @@ class DrawerPaciente extends StatelessWidget {
     String label,
     IconData icone,
     Color cor,
-    bool isDark,
   ) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 14),
       decoration: BoxDecoration(
-        color: cor.withValues(alpha: isDark ? 0.15 : 0.08),
+        color: cor.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
@@ -305,7 +291,6 @@ class DrawerPaciente extends StatelessWidget {
     String titulo,
     String sub,
     Color cor,
-    bool isDark,
     VoidCallback onTap,
   ) {
     return GestureDetector(
@@ -314,7 +299,7 @@ class DrawerPaciente extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 10),
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: isDark ? const Color(0xFF2A2A2A) : const Color(0xFFF7F7F7),
+          color: const Color(0xFFF7F7F7),
           borderRadius: BorderRadius.circular(16),
         ),
         child: Row(
@@ -335,7 +320,7 @@ class DrawerPaciente extends StatelessWidget {
                   Text(
                     titulo,
                     style: TextStyle(
-                      color: isDark ? Colors.white : const Color(0xFF2E2E2E),
+                      color: const Color(0xFF2E2E2E),
                       fontWeight: FontWeight.bold,
                       fontSize: 14,
                     ),
@@ -343,7 +328,7 @@ class DrawerPaciente extends StatelessWidget {
                   Text(
                     sub,
                     style: TextStyle(
-                      color: isDark ? Colors.white38 : Colors.grey,
+                      color: Colors.grey,
                       fontSize: 12,
                     ),
                   ),
@@ -352,7 +337,7 @@ class DrawerPaciente extends StatelessWidget {
             ),
             Icon(
               Icons.chevron_right,
-              color: isDark ? Colors.white30 : Colors.grey.shade300,
+              color: Colors.grey.shade300,
               size: 20,
             ),
           ],
@@ -366,7 +351,6 @@ class DrawerPaciente extends StatelessWidget {
     String titulo,
     String sub,
     Color cor,
-    bool isDark,
     bool valor,
     VoidCallback onTap,
   ) {
@@ -374,7 +358,7 @@ class DrawerPaciente extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF2A2A2A) : const Color(0xFFF7F7F7),
+        color: const Color(0xFFF7F7F7),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Row(
@@ -395,7 +379,7 @@ class DrawerPaciente extends StatelessWidget {
                 Text(
                   titulo,
                   style: TextStyle(
-                    color: isDark ? Colors.white : const Color(0xFF2E2E2E),
+                    color: const Color(0xFF2E2E2E),
                     fontWeight: FontWeight.bold,
                     fontSize: 14,
                   ),
@@ -403,7 +387,7 @@ class DrawerPaciente extends StatelessWidget {
                 Text(
                   sub,
                   style: TextStyle(
-                    color: isDark ? Colors.white38 : Colors.grey,
+                    color: Colors.grey,
                     fontSize: 12,
                   ),
                 ),

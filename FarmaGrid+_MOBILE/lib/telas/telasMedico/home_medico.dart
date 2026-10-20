@@ -1,4 +1,3 @@
-import 'package:farmagrid/app_theme.dart';
 import 'package:farmagrid/telas/login.dart';
 import 'package:flutter/material.dart';
 import 'agenda_medico.dart';
@@ -27,14 +26,12 @@ class _TelaHomeMedicoState extends State<TelaHomeMedico> {
   final Color corVerdeOliva = const Color(0xFF136A48);
   final Color corTealBotao = const Color(0xFF7FC6BB);
 
-  final _themeCtrl = AppThemeController();
   Map<String, dynamic>? _perfil;
   List<ConsultaMedica> _consultasHoje = [];
 
   @override
   void initState() {
     super.initState();
-    _themeCtrl.addListener(() => setState(() {}));
     PerfilService.carregar(atualizar: true)
         .then((p) {
           if (mounted) setState(() => _perfil = p);
@@ -61,13 +58,9 @@ class _TelaHomeMedicoState extends State<TelaHomeMedico> {
         .catchError((_) {});
   }
 
-  Color get corFundo => _themeCtrl.darkMode
-      ? const Color(0xFF121212)
-      : const Color.fromARGB(255, 245, 245, 245);
-  Color get corCard =>
-      _themeCtrl.darkMode ? const Color(0xFF1E1E1E) : Colors.white;
-  Color get corTexto =>
-      _themeCtrl.darkMode ? Colors.white : const Color(0xFF2E2E2E);
+  Color get corFundo => const Color.fromARGB(255, 245, 245, 245);
+  Color get corCard => Colors.white;
+  Color get corTexto => const Color(0xFF2E2E2E);
 
   void _abrirPerfil() {
     showModalBottomSheet(
@@ -75,7 +68,6 @@ class _TelaHomeMedicoState extends State<TelaHomeMedico> {
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (_) => DrawerMedico(
-        themeCtrl: _themeCtrl,
         corVerde: corVerdePrimario,
         corOliva: corVerdeOliva,
         corTeal: corTealBotao,
@@ -532,11 +524,9 @@ class _TelaHomeMedicoState extends State<TelaHomeMedico> {
 }
 
 class _DrawerMedico extends StatefulWidget {
-  final AppThemeController themeCtrl;
   final Color corVerde, corOliva, corTeal, corCard, corTexto;
 
   const _DrawerMedico({
-    required this.themeCtrl,
     required this.corVerde,
     required this.corOliva,
     required this.corTeal,
@@ -582,9 +572,8 @@ class _DrawerMedicoState extends State<_DrawerMedico> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = widget.themeCtrl.darkMode;
-    final bgColor = isDark ? const Color(0xFF1A1A1A) : Colors.white;
-    final subColor = isDark ? Colors.white60 : Colors.grey;
+    const bgColor = Colors.white;
+    const subColor = Colors.grey;
 
     return DraggableScrollableSheet(
       initialChildSize: 0.92,
@@ -655,7 +644,7 @@ class _DrawerMedicoState extends State<_DrawerMedico> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: widget.corVerde.withValues(alpha: isDark ? 0.15 : 0.06),
+                color: widget.corVerde.withValues(alpha: 0.06),
                 borderRadius: BorderRadius.circular(18),
                 border: Border.all(
                   color: widget.corVerde.withValues(alpha: 0.2),
@@ -677,35 +666,30 @@ class _DrawerMedicoState extends State<_DrawerMedico> {
                     Icons.badge_outlined,
                     "CRM",
                     "CRM/SP 123456",
-                    isDark,
                   ),
                   const SizedBox(height: 10),
                   _dadoProfissional(
                     Icons.local_hospital_outlined,
                     "Especialidade",
                     "Clínica Geral",
-                    isDark,
                   ),
                   const SizedBox(height: 10),
                   _dadoProfissional(
                     Icons.school_outlined,
                     "Formação",
                     "USP – Medicina 2012",
-                    isDark,
                   ),
                   const SizedBox(height: 10),
                   _dadoProfissional(
                     Icons.work_outline,
                     "Experiência",
                     "12 anos",
-                    isDark,
                   ),
                   const SizedBox(height: 10),
                   _dadoProfissional(
                     Icons.location_on_outlined,
                     "Consultório",
                     "Av. Paulista, 1000 - SP",
-                    isDark,
                   ),
                 ],
               ),
@@ -719,7 +703,6 @@ class _DrawerMedicoState extends State<_DrawerMedico> {
                     "Pacientes",
                     Icons.people_outline,
                     widget.corVerde,
-                    isDark,
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -729,7 +712,6 @@ class _DrawerMedicoState extends State<_DrawerMedico> {
                     "Hoje",
                     Icons.calendar_today_outlined,
                     widget.corTeal,
-                    isDark,
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -739,7 +721,6 @@ class _DrawerMedicoState extends State<_DrawerMedico> {
                     "Nota",
                     Icons.star_outline,
                     widget.corOliva,
-                    isDark,
                   ),
                 ),
               ],
@@ -751,7 +732,6 @@ class _DrawerMedicoState extends State<_DrawerMedico> {
               "Meu Perfil",
               "Editar dados pessoais",
               widget.corVerde,
-              isDark,
               () => _irParaAba(0),
             ),
             _item(
@@ -759,7 +739,6 @@ class _DrawerMedicoState extends State<_DrawerMedico> {
               "Informações Profissionais",
               "Registro, especialidades e clínica",
               widget.corVerde,
-              isDark,
               () => _irParaAba(1),
             ),
             _item(
@@ -767,7 +746,6 @@ class _DrawerMedicoState extends State<_DrawerMedico> {
               "Segurança",
               "Alterar senha de acesso",
               widget.corVerde,
-              isDark,
               () => _irParaAba(2),
             ),
             const SizedBox(height: 20),
@@ -778,7 +756,6 @@ class _DrawerMedicoState extends State<_DrawerMedico> {
               "Privacidade",
               "Dados e permissões",
               widget.corVerde,
-              isDark,
               () => _irParaAba(2),
             ),
             const SizedBox(height: 20),
@@ -788,7 +765,6 @@ class _DrawerMedicoState extends State<_DrawerMedico> {
               "Sobre Nós",
               "Conheça a equipe",
               widget.corVerde,
-              isDark,
               () => _irParaTela(const TelaSobreNos()),
             ),
             const SizedBox(height: 24),
@@ -850,7 +826,6 @@ class _DrawerMedicoState extends State<_DrawerMedico> {
     IconData icone,
     String label,
     String valor,
-    bool isDark,
   ) => Row(
     children: [
       Icon(icone, size: 18, color: corVerdePrimario),
@@ -861,14 +836,14 @@ class _DrawerMedicoState extends State<_DrawerMedico> {
           Text(
             label,
             style: TextStyle(
-              color: isDark ? Colors.white38 : Colors.grey,
+              color: Colors.grey,
               fontSize: 11,
             ),
           ),
           Text(
             valor,
             style: TextStyle(
-              color: isDark ? Colors.white : const Color(0xFF2E2E2E),
+              color: const Color(0xFF2E2E2E),
               fontWeight: FontWeight.w600,
               fontSize: 13,
             ),
@@ -896,12 +871,11 @@ class _DrawerMedicoState extends State<_DrawerMedico> {
     String label,
     IconData icone,
     Color cor,
-    bool isDark,
   ) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 14),
       decoration: BoxDecoration(
-        color: cor.withValues(alpha: isDark ? 0.15 : 0.08),
+        color: cor.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
@@ -930,7 +904,6 @@ class _DrawerMedicoState extends State<_DrawerMedico> {
     String titulo,
     String sub,
     Color cor,
-    bool isDark,
     VoidCallback onTap,
   ) {
     return GestureDetector(
@@ -939,7 +912,7 @@ class _DrawerMedicoState extends State<_DrawerMedico> {
         margin: const EdgeInsets.only(bottom: 10),
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: isDark ? const Color(0xFF2A2A2A) : const Color(0xFFF7F7F7),
+          color: const Color(0xFFF7F7F7),
           borderRadius: BorderRadius.circular(16),
         ),
         child: Row(
@@ -960,7 +933,7 @@ class _DrawerMedicoState extends State<_DrawerMedico> {
                   Text(
                     titulo,
                     style: TextStyle(
-                      color: isDark ? Colors.white : const Color(0xFF2E2E2E),
+                      color: const Color(0xFF2E2E2E),
                       fontWeight: FontWeight.bold,
                       fontSize: 14,
                     ),
@@ -968,7 +941,7 @@ class _DrawerMedicoState extends State<_DrawerMedico> {
                   Text(
                     sub,
                     style: TextStyle(
-                      color: isDark ? Colors.white38 : Colors.grey,
+                      color: Colors.grey,
                       fontSize: 12,
                     ),
                   ),
@@ -977,7 +950,7 @@ class _DrawerMedicoState extends State<_DrawerMedico> {
             ),
             Icon(
               Icons.chevron_right,
-              color: isDark ? Colors.white30 : Colors.grey.shade300,
+              color: Colors.grey.shade300,
               size: 20,
             ),
           ],
@@ -991,7 +964,6 @@ class _DrawerMedicoState extends State<_DrawerMedico> {
     String titulo,
     String sub,
     Color cor,
-    bool isDark,
     bool valor,
     VoidCallback onTap,
   ) {
@@ -999,7 +971,7 @@ class _DrawerMedicoState extends State<_DrawerMedico> {
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF2A2A2A) : const Color(0xFFF7F7F7),
+        color: const Color(0xFFF7F7F7),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Row(
@@ -1020,7 +992,7 @@ class _DrawerMedicoState extends State<_DrawerMedico> {
                 Text(
                   titulo,
                   style: TextStyle(
-                    color: isDark ? Colors.white : const Color(0xFF2E2E2E),
+                    color: const Color(0xFF2E2E2E),
                     fontWeight: FontWeight.bold,
                     fontSize: 14,
                   ),
@@ -1028,7 +1000,7 @@ class _DrawerMedicoState extends State<_DrawerMedico> {
                 Text(
                   sub,
                   style: TextStyle(
-                    color: isDark ? Colors.white38 : Colors.grey,
+                    color: Colors.grey,
                     fontSize: 12,
                   ),
                 ),

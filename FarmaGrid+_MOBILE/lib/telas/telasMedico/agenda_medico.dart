@@ -1,6 +1,5 @@
 import 'package:farmagrid/widgets/carregamento.dart';
 import 'package:flutter/material.dart';
-import 'package:farmagrid/app_theme.dart';
 import '../../models/medico_models.dart';
 import '../../services/medico_service.dart';
 import '../../util/formatador_data.dart';
@@ -17,7 +16,6 @@ class _TelaAgendaMedicoState extends State<TelaAgendaMedico> {
   final Color corVerdeOliva = const Color(0xFF136A48);
   final Color corTealBotao = const Color(0xFF7FC6BB);
 
-  final _themeCtrl = AppThemeController();
   List<ConsultaMedica> _consultas = const [];
   bool _carregando = true;
   String? _erro;
@@ -25,7 +23,6 @@ class _TelaAgendaMedicoState extends State<TelaAgendaMedico> {
   @override
   void initState() {
     super.initState();
-    _themeCtrl.addListener(() => setState(() {}));
     _carregarAgenda();
   }
 
@@ -46,14 +43,10 @@ class _TelaAgendaMedicoState extends State<TelaAgendaMedico> {
     }
   }
 
-  Color get corFundo => _themeCtrl.darkMode
-      ? const Color(0xFF121212)
-      : const Color.fromARGB(255, 245, 245, 245);
-  Color get corCard =>
-      _themeCtrl.darkMode ? const Color(0xFF1E1E1E) : Colors.white;
-  Color get corTexto =>
-      _themeCtrl.darkMode ? Colors.white : const Color(0xFF2E2E2E);
-  Color get corSubtexto => _themeCtrl.darkMode ? Colors.white60 : Colors.grey;
+  Color get corFundo => const Color.fromARGB(255, 245, 245, 245);
+  Color get corCard => Colors.white;
+  Color get corTexto => const Color(0xFF2E2E2E);
+  Color get corSubtexto => Colors.grey;
 
   @override
   Widget build(BuildContext context) {
@@ -164,7 +157,7 @@ class _TelaAgendaMedicoState extends State<TelaAgendaMedico> {
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(
-              alpha: _themeCtrl.darkMode ? 0.2 : 0.06,
+              alpha: 0.06,
             ),
             blurRadius: 15,
             offset: const Offset(0, 6),
@@ -247,7 +240,7 @@ class _TelaAgendaMedicoState extends State<TelaAgendaMedico> {
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(
-              alpha: _themeCtrl.darkMode ? 0.2 : 0.05,
+              alpha: 0.05,
             ),
             blurRadius: 10,
             offset: const Offset(0, 4),

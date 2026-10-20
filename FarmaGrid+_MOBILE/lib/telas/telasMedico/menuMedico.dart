@@ -1,4 +1,3 @@
-import 'package:farmagrid/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:farmagrid/telas/telasMedico/configuracoesMedico.dart';
 import 'package:farmagrid/telas/sobreNos.dart';
@@ -7,12 +6,10 @@ import '../../services/auth_service.dart';
 import '../login.dart';
 
 class DrawerMedico extends StatelessWidget {
-  final AppThemeController themeCtrl;
   final Color corVerde, corOliva, corTeal, corCard, corTexto;
 
   const DrawerMedico({
     super.key,
-    required this.themeCtrl,
     required this.corVerde,
     required this.corOliva,
     required this.corTeal,
@@ -41,9 +38,8 @@ class DrawerMedico extends StatelessWidget {
     final perfil = PerfilService.atual.value;
     final foto = PerfilService.foto(perfil);
     final nome = PerfilService.nome(perfil);
-    final isDark = themeCtrl.darkMode;
-    final bgColor = isDark ? const Color(0xFF1A1A1A) : Colors.white;
-    final subColor = isDark ? Colors.white60 : Colors.grey;
+    const bgColor = Colors.white;
+    const subColor = Colors.grey;
 
     return DraggableScrollableSheet(
       initialChildSize: 0.92,
@@ -117,7 +113,7 @@ class DrawerMedico extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: corVerde.withValues(alpha: isDark ? 0.15 : 0.06),
+                color: corVerde.withValues(alpha: 0.06),
                 borderRadius: BorderRadius.circular(18),
                 border: Border.all(color: corVerde.withValues(alpha: 0.2)),
               ),
@@ -137,35 +133,30 @@ class DrawerMedico extends StatelessWidget {
                     Icons.badge_outlined,
                     "CRM",
                     '${perfil?['crm'] ?? ''}',
-                    isDark,
                   ),
                   const SizedBox(height: 10),
                   _dadoProfissional(
                     Icons.local_hospital_outlined,
                     "Especialidade",
                     '${perfil?['especialidade'] ?? ''}',
-                    isDark,
                   ),
                   const SizedBox(height: 10),
                   _dadoProfissional(
                     Icons.school_outlined,
                     "Formação",
                     '${perfil?['subespecialidades'] ?? 'Não informado'}',
-                    isDark,
                   ),
                   const SizedBox(height: 10),
                   _dadoProfissional(
                     Icons.work_outline,
                     "Experiência",
                     '${perfil?['tipoAtendimento'] ?? 'Não informado'}',
-                    isDark,
                   ),
                   const SizedBox(height: 10),
                   _dadoProfissional(
                     Icons.location_on_outlined,
                     "Consultório",
                     '${perfil?['nomeClinica'] ?? ''}',
-                    isDark,
                   ),
                 ],
               ),
@@ -179,7 +170,6 @@ class DrawerMedico extends StatelessWidget {
                     "Pacientes",
                     Icons.people_outline,
                     corVerde,
-                    isDark,
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -189,7 +179,6 @@ class DrawerMedico extends StatelessWidget {
                     "Consultas",
                     Icons.calendar_today_outlined,
                     corTeal,
-                    isDark,
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -199,7 +188,6 @@ class DrawerMedico extends StatelessWidget {
                     "Receitas",
                     Icons.description_outlined,
                     corOliva,
-                    isDark,
                   ),
                 ),
               ],
@@ -211,7 +199,6 @@ class DrawerMedico extends StatelessWidget {
               "Meu Perfil",
               "Editar dados pessoais",
               corVerde,
-              isDark,
               () => _navegarParaAba(context, 0),
             ),
             _item(
@@ -219,7 +206,6 @@ class DrawerMedico extends StatelessWidget {
               "Informações Profissionais",
               "Registro, especialidades e clínica",
               corVerde,
-              isDark,
               () => _navegarParaAba(context, 1),
             ),
             _item(
@@ -227,7 +213,6 @@ class DrawerMedico extends StatelessWidget {
               "Segurança",
               "Alterar senha de acesso",
               corVerde,
-              isDark,
               () => _navegarParaAba(context, 2),
             ),
             const SizedBox(height: 20),
@@ -237,7 +222,6 @@ class DrawerMedico extends StatelessWidget {
               "Privacidade",
               "Dados e permissões",
               corVerde,
-              isDark,
               () => _navegarParaAba(context, 2),
             ),
             const SizedBox(height: 20),
@@ -248,7 +232,6 @@ class DrawerMedico extends StatelessWidget {
               "Sobre Nós",
               "Conheça a equipe",
               corVerde,
-              isDark,
               () => _navegarPara(context, const TelaSobreNos()),
             ),
             const SizedBox(height: 24),
@@ -310,7 +293,6 @@ class DrawerMedico extends StatelessWidget {
     IconData icone,
     String label,
     String valor,
-    bool isDark,
   ) => Row(
     children: [
       Icon(icone, size: 18, color: corVerde),
@@ -321,14 +303,14 @@ class DrawerMedico extends StatelessWidget {
           Text(
             label,
             style: TextStyle(
-              color: isDark ? Colors.white38 : Colors.grey,
+              color: Colors.grey,
               fontSize: 11,
             ),
           ),
           Text(
             valor,
             style: TextStyle(
-              color: isDark ? Colors.white : const Color(0xFF2E2E2E),
+              color: const Color(0xFF2E2E2E),
               fontWeight: FontWeight.w600,
               fontSize: 13,
             ),
@@ -356,12 +338,11 @@ class DrawerMedico extends StatelessWidget {
     String label,
     IconData icone,
     Color cor,
-    bool isDark,
   ) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 14),
       decoration: BoxDecoration(
-        color: cor.withValues(alpha: isDark ? 0.15 : 0.08),
+        color: cor.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
@@ -390,7 +371,6 @@ class DrawerMedico extends StatelessWidget {
     String titulo,
     String sub,
     Color cor,
-    bool isDark,
     VoidCallback onTap,
   ) {
     return GestureDetector(
@@ -399,7 +379,7 @@ class DrawerMedico extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 10),
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: isDark ? const Color(0xFF2A2A2A) : const Color(0xFFF7F7F7),
+          color: const Color(0xFFF7F7F7),
           borderRadius: BorderRadius.circular(16),
         ),
         child: Row(
@@ -420,7 +400,7 @@ class DrawerMedico extends StatelessWidget {
                   Text(
                     titulo,
                     style: TextStyle(
-                      color: isDark ? Colors.white : const Color(0xFF2E2E2E),
+                      color: const Color(0xFF2E2E2E),
                       fontWeight: FontWeight.bold,
                       fontSize: 14,
                     ),
@@ -428,7 +408,7 @@ class DrawerMedico extends StatelessWidget {
                   Text(
                     sub,
                     style: TextStyle(
-                      color: isDark ? Colors.white38 : Colors.grey,
+                      color: Colors.grey,
                       fontSize: 12,
                     ),
                   ),
@@ -437,7 +417,7 @@ class DrawerMedico extends StatelessWidget {
             ),
             Icon(
               Icons.chevron_right,
-              color: isDark ? Colors.white30 : Colors.grey.shade300,
+              color: Colors.grey.shade300,
               size: 20,
             ),
           ],
@@ -451,7 +431,6 @@ class DrawerMedico extends StatelessWidget {
     String titulo,
     String sub,
     Color cor,
-    bool isDark,
     bool valor,
     VoidCallback onTap,
   ) {
@@ -459,7 +438,7 @@ class DrawerMedico extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF2A2A2A) : const Color(0xFFF7F7F7),
+        color: const Color(0xFFF7F7F7),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Row(
@@ -480,7 +459,7 @@ class DrawerMedico extends StatelessWidget {
                 Text(
                   titulo,
                   style: TextStyle(
-                    color: isDark ? Colors.white : const Color(0xFF2E2E2E),
+                    color: const Color(0xFF2E2E2E),
                     fontWeight: FontWeight.bold,
                     fontSize: 14,
                   ),
@@ -488,7 +467,7 @@ class DrawerMedico extends StatelessWidget {
                 Text(
                   sub,
                   style: TextStyle(
-                    color: isDark ? Colors.white38 : Colors.grey,
+                    color: Colors.grey,
                     fontSize: 12,
                   ),
                 ),

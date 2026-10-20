@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
-import 'package:farmagrid/app_theme.dart';
 import '../../services/auth_service.dart';
 import '../../services/perfil_service.dart';
 import 'package:image_picker/image_picker.dart';
@@ -21,20 +20,18 @@ class TelaConfiguracoesMedico extends StatefulWidget {
 
 class _TelaConfiguracoesMedicoState extends State<TelaConfiguracoesMedico> {
   int _abaSelecionada = 0;
-  final _themeCtrl = AppThemeController();
 
-  bool get _isDark => _themeCtrl.darkMode;
   Color get _corFundo =>
-      _isDark ? const Color(0xFF121212) : const Color(0xFFF5F5F5);
-  Color get _corCard => _isDark ? const Color(0xFF1E1E1E) : Colors.white;
-  Color get _corTexto => _isDark ? Colors.white : const Color(0xFF2E2E2E);
-  Color get _corSubtexto => _isDark ? Colors.white60 : Colors.grey;
+      const Color(0xFFF5F5F5);
+  Color get _corCard => Colors.white;
+  Color get _corTexto => const Color(0xFF2E2E2E);
+  Color get _corSubtexto => Colors.grey;
   Color get _corBorda =>
-      _isDark ? const Color(0xFF333333) : const Color(0xFFEEEEEE);
+      const Color(0xFFEEEEEE);
   Color get _corCampo =>
-      _isDark ? const Color(0xFF2A2A2A) : const Color(0xFFF9F9F9);
+      const Color(0xFFF9F9F9);
   Color get _corBordaCampo =>
-      _isDark ? const Color(0xFF444444) : const Color(0xFFDDDDDD);
+      const Color(0xFFDDDDDD);
 
   final _nomeCtrl = TextEditingController();
   final _sobrenomeCtrl = TextEditingController();

@@ -1,7 +1,6 @@
 import '../../models/lista_models.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
-import 'package:farmagrid/app_theme.dart';
 import '../../services/perfil_service.dart';
 import '../../services/paciente_service.dart';
 import 'package:image_picker/image_picker.dart';
@@ -18,7 +17,6 @@ class TelaConfiguracoesPaciente extends StatefulWidget {
 }
 
 class _TelaConfiguracoesPacienteState extends State<TelaConfiguracoesPaciente> {
-  final _themeCtrl = AppThemeController();
   int _abaSelecionada = 0;
   bool _modoEdicao = false;
   Map<String, dynamic> _perfil = {};
@@ -83,18 +81,17 @@ class _TelaConfiguracoesPacienteState extends State<TelaConfiguracoesPaciente> {
     {'titulo': 'Dependentes', 'icone': Icons.people_outline},
   ];
 
-  bool get _isDark => _themeCtrl.darkMode;
   Color get _corFundo =>
-      _isDark ? const Color(0xFF121212) : const Color(0xFFF5F5F5);
-  Color get _corCard => _isDark ? const Color(0xFF1E1E1E) : Colors.white;
-  Color get _corTexto => _isDark ? Colors.white : const Color(0xFF2E2E2E);
-  Color get _corSubtexto => _isDark ? Colors.white60 : Colors.grey;
+      const Color(0xFFF5F5F5);
+  Color get _corCard => Colors.white;
+  Color get _corTexto => const Color(0xFF2E2E2E);
+  Color get _corSubtexto => Colors.grey;
   Color get _corBorda =>
-      _isDark ? const Color(0xFF333333) : const Color(0xFFEEEEEE);
+      const Color(0xFFEEEEEE);
   Color get _corCampo =>
-      _isDark ? const Color(0xFF2A2A2A) : const Color(0xFFF9F9F9);
+      const Color(0xFFF9F9F9);
   Color get _corBordaCampo =>
-      _isDark ? const Color(0xFF444444) : const Color(0xFFDDDDDD);
+      const Color(0xFFDDDDDD);
 
   static const Color _verde = Color(0xFF59AA53);
   static const Color _oliva = Color(0xFF136A48);
@@ -587,7 +584,7 @@ class _TelaConfiguracoesPacienteState extends State<TelaConfiguracoesPaciente> {
         decoration: BoxDecoration(
           color: sel
               ? _verde
-              : (_isDark ? const Color(0xFF2A2A2A) : const Color(0xFFF5F5F5)),
+              : (const Color(0xFFF5F5F5)),
           borderRadius: BorderRadius.circular(14),
         ),
         child: Row(
@@ -597,7 +594,7 @@ class _TelaConfiguracoesPacienteState extends State<TelaConfiguracoesPaciente> {
               _abas[index]['icone'] as IconData,
               color: sel
                   ? Colors.white
-                  : (_isDark ? Colors.white54 : Colors.grey[500]),
+                  : (Colors.grey[500]),
               size: 17,
             ),
             const SizedBox(width: 7),
@@ -607,7 +604,7 @@ class _TelaConfiguracoesPacienteState extends State<TelaConfiguracoesPaciente> {
                 fontSize: 12.5,
                 color: sel
                     ? Colors.white
-                    : (_isDark ? Colors.white60 : Colors.grey[600]),
+                    : (Colors.grey[600]),
                 fontWeight: sel ? FontWeight.bold : FontWeight.w500,
               ),
             ),
@@ -656,7 +653,7 @@ class _TelaConfiguracoesPacienteState extends State<TelaConfiguracoesPaciente> {
                     Text(
                       titulo,
                       style: TextStyle(
-                        color: _isDark ? Colors.white : _oliva,
+                        color: _oliva,
                         fontSize: 19,
                         fontWeight: FontWeight.bold,
                       ),
@@ -871,7 +868,7 @@ class _TelaConfiguracoesPacienteState extends State<TelaConfiguracoesPaciente> {
                   'Tipo Sanguíneo:',
                   style: TextStyle(
                     fontSize: 13,
-                    color: _isDark ? Colors.white70 : const Color(0xFF444444),
+                    color: const Color(0xFF444444),
                   ),
                 ),
                 const SizedBox(height: 6),
@@ -924,7 +921,7 @@ class _TelaConfiguracoesPacienteState extends State<TelaConfiguracoesPaciente> {
                   'Alergias conhecidas:',
                   style: TextStyle(
                     fontSize: 13,
-                    color: _isDark ? Colors.white70 : const Color(0xFF444444),
+                    color: const Color(0xFF444444),
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -1118,7 +1115,7 @@ class _TelaConfiguracoesPacienteState extends State<TelaConfiguracoesPaciente> {
                   'Trocar plano:',
                   style: TextStyle(
                     fontSize: 13,
-                    color: _isDark ? Colors.white70 : const Color(0xFF444444),
+                    color: const Color(0xFF444444),
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -1504,7 +1501,7 @@ class _TelaConfiguracoesPacienteState extends State<TelaConfiguracoesPaciente> {
                   'Nome completo',
                   style: TextStyle(
                     fontSize: 13,
-                    color: _isDark ? Colors.white70 : const Color(0xFF444444),
+                    color: const Color(0xFF444444),
                   ),
                 ),
                 const SizedBox(height: 6),
@@ -1539,7 +1536,7 @@ class _TelaConfiguracoesPacienteState extends State<TelaConfiguracoesPaciente> {
                   'CPF',
                   style: TextStyle(
                     fontSize: 13,
-                    color: _isDark ? Colors.white70 : const Color(0xFF444444),
+                    color: const Color(0xFF444444),
                   ),
                 ),
                 const SizedBox(height: 6),
@@ -1575,7 +1572,7 @@ class _TelaConfiguracoesPacienteState extends State<TelaConfiguracoesPaciente> {
                   'Parentesco',
                   style: TextStyle(
                     fontSize: 13,
-                    color: _isDark ? Colors.white70 : const Color(0xFF444444),
+                    color: const Color(0xFF444444),
                   ),
                 ),
                 const SizedBox(height: 6),
@@ -1753,7 +1750,7 @@ class _TelaConfiguracoesPacienteState extends State<TelaConfiguracoesPaciente> {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 14),
       decoration: BoxDecoration(
-        color: cor.withValues(alpha: _isDark ? 0.15 : 0.08),
+        color: cor.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
@@ -1790,7 +1787,7 @@ class _TelaConfiguracoesPacienteState extends State<TelaConfiguracoesPaciente> {
         border: Border.all(color: _corBorda),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: _isDark ? 0.2 : 0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 8,
             offset: const Offset(0, 3),
           ),
@@ -1802,7 +1799,7 @@ class _TelaConfiguracoesPacienteState extends State<TelaConfiguracoesPaciente> {
           Text(
             titulo,
             style: TextStyle(
-              color: _isDark ? Colors.white : _oliva,
+              color: _oliva,
               fontSize: 15,
               fontWeight: FontWeight.bold,
             ),
@@ -2003,7 +2000,7 @@ class _TelaConfiguracoesPacienteState extends State<TelaConfiguracoesPaciente> {
           label,
           style: TextStyle(
             fontSize: 13,
-            color: _isDark ? Colors.white70 : const Color(0xFF444444),
+            color: const Color(0xFF444444),
           ),
         ),
         const SizedBox(height: 5),
@@ -2018,13 +2015,13 @@ class _TelaConfiguracoesPacienteState extends State<TelaConfiguracoesPaciente> {
             fontSize: 14,
             color: editavel
                 ? _corTexto
-                : (_isDark ? Colors.white54 : const Color(0xFF666666)),
+                : (const Color(0xFF666666)),
           ),
           decoration: InputDecoration(
             filled: true,
             fillColor: editavel
                 ? _corCampo
-                : (_isDark ? const Color(0xFF1A1A1A) : const Color(0xFFF0F0F0)),
+                : (const Color(0xFFF0F0F0)),
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 14,
               vertical: 12,
@@ -2042,9 +2039,7 @@ class _TelaConfiguracoesPacienteState extends State<TelaConfiguracoesPaciente> {
             disabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
               borderSide: BorderSide(
-                color: _isDark
-                    ? const Color(0xFF333333)
-                    : const Color(0xFFE8E8E8),
+                color: const Color(0xFFE8E8E8),
               ),
             ),
             focusedBorder: OutlineInputBorder(
@@ -2070,7 +2065,7 @@ class _TelaConfiguracoesPacienteState extends State<TelaConfiguracoesPaciente> {
           label,
           style: TextStyle(
             fontSize: 13,
-            color: _isDark ? Colors.white70 : const Color(0xFF444444),
+            color: const Color(0xFF444444),
           ),
         ),
         const SizedBox(height: 5),
