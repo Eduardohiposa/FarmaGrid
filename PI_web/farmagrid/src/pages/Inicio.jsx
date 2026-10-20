@@ -88,7 +88,7 @@ export function Inicio({ onLogin }) {
             <div className="hero-image">
               <div className="video-responsivo">
                 <video autoPlay loop muted playsInline>
-                  <source src="/midia/ExemploDesktop.mp4" type="video/mp4" />
+                  <source src="/midia/videofarma.mp4" type="video/mp4" />
                 </video>
               </div>
             </div>
