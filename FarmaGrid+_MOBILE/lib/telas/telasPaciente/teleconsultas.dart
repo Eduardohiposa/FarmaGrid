@@ -29,6 +29,7 @@ class _TeleconsultasState extends State<Teleconsultas> {
       _erro = null;
     });
     try {
+      // busca consultas e medicos ao mesmo tempo porque uma consulta nao depende da outra
       final dados = await Future.wait([
         PacienteService.listarConsultas(),
         PacienteService.listarMedicos(),

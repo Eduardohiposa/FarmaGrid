@@ -58,6 +58,7 @@ class _TelaDetalhesPacienteState extends State<TelaDetalhesPaciente> {
       _erro = null;
     });
     try {
+      // junto os dados do paciente e os registros clinicos pra abrir tudo de uma vez
       final resultados = await Future.wait([
         MedicoService.listarProntuariosPaciente(widget.idPaciente),
         MedicoService.buscarPerfilPaciente(widget.idPaciente),

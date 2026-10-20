@@ -251,6 +251,7 @@ class _TelaConfiguracoesPacienteState extends State<TelaConfiguracoesPaciente> {
 
   Future<void> _carregarDados() async {
     try {
+      // carrega os dados de configuracao juntos pra montar a tela de uma vez
       final resultados = await Future.wait([
         PerfilService.carregar(atualizar: true),
         PacienteService.listarDependentes(),
@@ -332,6 +333,7 @@ class _TelaConfiguracoesPacienteState extends State<TelaConfiguracoesPaciente> {
     }
   }
 
+  // abre a galeria pra escolher uma foto de perfil
   Future<void> _selecionarFoto() async {
     try {
       final arquivo = await ImagePicker().pickImage(
@@ -559,6 +561,7 @@ class _TelaConfiguracoesPacienteState extends State<TelaConfiguracoesPaciente> {
         ],
       ),
       child: ScrollConfiguration(
+        // ajusto o efeito da rolagem pra combinar com o visual do app
         behavior: _SemGlowScroll(),
         child: ListView.builder(
           scrollDirection: Axis.horizontal,
@@ -1814,6 +1817,7 @@ class _TelaConfiguracoesPacienteState extends State<TelaConfiguracoesPaciente> {
   }
 
   Widget _prototipoCartao() {
+    // essa animacao deixa a troca entre os estados da tela mais suave
     return AnimatedContainer(
       duration: const Duration(milliseconds: 250),
       width: double.infinity,
@@ -2184,6 +2188,7 @@ class _TelaConfiguracoesPacienteState extends State<TelaConfiguracoesPaciente> {
   }
 }
 
+// remove o brilho padrao que aparece ao chegar no fim da rolagem
 class _SemGlowScroll extends ScrollBehavior {
   @override
   Widget buildOverscrollIndicator(
@@ -2200,6 +2205,7 @@ class _SemGlowScroll extends ScrollBehavior {
   };
 }
 
+// esses formatadores deixam os dados do cartao no padrao enquanto a pessoa digita
 class _NumeroCartaoFormatter extends TextInputFormatter {
   const _NumeroCartaoFormatter();
 

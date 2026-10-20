@@ -48,6 +48,7 @@ class _TelaCadastroMedicoState extends State<TelaCadastroMedico> {
 
   bool _senhaVisivel = false;
 
+  // mascaras pra crm, rqe e telefone ja sairem formatados enquanto digita
   final _crmMask = MaskTextInputFormatter(
     mask: '######/AA',
     filter: {'#': RegExp(r'[0-9]'), 'A': RegExp(r'[A-Za-z]')},

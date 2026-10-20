@@ -1,6 +1,7 @@
 int _int(dynamic value) =>
     value is num ? value.toInt() : int.tryParse('$value') ?? 0;
 
+// organiza em objetos os dados de consulta, paciente e prontuario da api
 class ConsultaMedica {
   final int id;
   final int idMedico;

@@ -1,3 +1,4 @@
+// converte os dados da sessao entre o formato json da api e objetos
 class UsuarioLogado {
   final String token;
   final int id;

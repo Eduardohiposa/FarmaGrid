@@ -1009,6 +1009,7 @@ class _DrawerMedicoState extends State<_DrawerMedico> {
           ),
           GestureDetector(
             onTap: onTap,
+            // anima o seletor da navegacao pra acompanhar a opcao escolhida
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 200),
               width: 46,

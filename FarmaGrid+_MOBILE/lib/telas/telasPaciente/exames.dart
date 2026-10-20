@@ -28,6 +28,7 @@ class _TelaExamesState extends State<TelaExames> {
       _erro = null;
     });
     try {
+      // carrega resultados e solicitacoes juntos pra tela abrir mais rapido
       final dados = await Future.wait([
         PacienteService.listarExames(),
         PacienteService.listarSolicitacoesExame(),

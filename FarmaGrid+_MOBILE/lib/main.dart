@@ -11,6 +11,7 @@ void main() {
   runApp(const MyApp());
 }
 
+
 class MyApp extends StatelessWidget {
   const MyApp({super.key, this.restaurarSessao});
 
@@ -65,6 +66,7 @@ class _TelaInicial extends StatefulWidget {
 }
 
 class _TelaInicialState extends State<_TelaInicial> {
+  // esse futurebuilder espera a verificacao da sessao pra mandar direto pra tela certa
   late final Future<bool> _restauracao;
 
   @override

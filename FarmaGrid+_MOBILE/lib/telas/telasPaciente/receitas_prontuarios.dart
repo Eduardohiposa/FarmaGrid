@@ -32,6 +32,7 @@ class _TelaReceitasProntuariosState extends State<TelaReceitasProntuarios> {
       _erro = null;
     });
     try {
+      // busca receitas e prontuarios juntos pra nao esperar cada chamada separada
       final resultados = await Future.wait([
         PacienteService.listarReceitas(),
         PacienteService.listarProntuarios(),

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 
+// avisa o resto do app quando alguma tarefa comeca ou termina
 class Carregamento extends ChangeNotifier {
   static final instancia = Carregamento();
   final Map<Object, String> _operacoes = {};
@@ -29,6 +30,7 @@ class CartaoCarregamento extends StatelessWidget {
   final String mensagem;
   @override
   Widget build(BuildContext context) => Center(
+    // informa o estado do carregamento pra quem usa leitor de tela
     child: Semantics(
       liveRegion: true,
       label: mensagem,
@@ -80,7 +82,9 @@ class CartaoCarregamento extends StatelessWidget {
 class CamadaCarregamento extends StatelessWidget {
   const CamadaCarregamento({super.key, required this.child});
   final Widget child;
+  // enquanto carrega, essa camada escurece a tela e evita toques ou voltar sem querer
   @override
+  // acompanha as mudancas do carregamento e bloqueia interacoes ate terminar
   Widget build(BuildContext context) => ListenableBuilder(
     listenable: Carregamento.instancia,
     builder: (context, _) {

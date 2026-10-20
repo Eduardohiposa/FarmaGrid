@@ -34,6 +34,7 @@ class _TelaHomePacienteState extends State<TelaHomePaciente> {
 
   Future<void> _carregarResumo() async {
     try {
+      // junta os pedidos que nao dependem um do outro pra carregar o resumo mais rapido
       final resultados = await Future.wait([
         PacienteService.buscarPerfil(),
         PacienteService.listarConsultas(),
@@ -46,7 +47,7 @@ class _TelaHomePacienteState extends State<TelaHomePaciente> {
           _proximaConsulta = consultas.isEmpty ? null : consultas.first;
         });
     } catch (_) {
-      // Os atalhos continuam disponíveis mesmo se o resumo não carregar.
+      // se o resumo falhar, ainda deixo os atalhos da tela funcionando normalmente
     }
   }
 

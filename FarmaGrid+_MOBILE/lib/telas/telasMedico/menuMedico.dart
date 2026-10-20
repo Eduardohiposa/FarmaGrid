@@ -476,6 +476,7 @@ class DrawerMedico extends StatelessWidget {
           ),
           GestureDetector(
             onTap: onTap,
+            // essa animacao deixa o seletor deslizar quando a pessoa troca a opcao
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 200),
               width: 46,

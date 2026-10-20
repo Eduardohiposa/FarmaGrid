@@ -5,6 +5,7 @@ import '../config/api_config.dart';
 import '../widgets/carregamento.dart';
 import 'auth_service.dart';
 
+// deixei as chamadas da api juntas pra reaproveitar o mesmo envio e tratamento de resposta
 class ApiService {
   static Map<String, String> get headers => {
     'Content-Type': 'application/json',
@@ -63,6 +64,7 @@ class ApiService {
     return 'Salvando...';
   }
 
+  // monta a requisicao, converte o json e mostra uma mensagem amigavel se der erro ou demorar
   static Future<dynamic> requisitar(
     String method,
     String path, {

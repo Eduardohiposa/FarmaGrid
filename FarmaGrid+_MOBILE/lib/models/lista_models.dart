@@ -1,3 +1,4 @@
+// modelos menores pra transformar dados de dependentes e equipe recebidos em json
 class DependentePaciente {
   final int id;
   final String nome, parentesco, cpf;

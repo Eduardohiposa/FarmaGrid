@@ -51,6 +51,7 @@ class _TelaCadastroPacienteState extends State<TelaCadastroPaciente> {
 
   bool _senhaVisivel = false;
 
+  // aplica mascaras pra telefone, cpf, data e cep ja sairem formatados enquanto digita
   final _telefoneMask = MaskTextInputFormatter(
     mask: '(##) #####-####',
     filter: {"#": RegExp(r'[0-9]')},
@@ -215,6 +216,7 @@ class _TelaCadastroPacienteState extends State<TelaCadastroPaciente> {
   }
 
   Future<void> _buscarCep() async {
+    // consulta um servico externo de cep e preenche o endereco quando encontra os dados
     final cep = _cepCtrl.text.replaceAll(RegExp(r'[^0-9]'), '');
 
     if (cep.length != 8) return;
