@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:farmagrid/telas/login.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../services/recuperacao_senha_service.dart';
@@ -245,22 +246,21 @@ class _TelaRecuperarSenhaState extends State<TelaRecuperarSenha> {
     return PopScope(
       canPop: !_ocupado,
       child: Scaffold(
-        backgroundColor: const Color(0xFFFFFCEE),
+        backgroundColor: corFundoClaro,
         body: LayoutBuilder(
           builder: (context, constraints) {
             final largo = constraints.maxWidth >= 850;
             return Stack(
               children: [
                 Positioned.fill(
-                  child: Image.asset(
-                    'assets/images/senhaEsquecida.jpeg',
-                    fit: BoxFit.cover,
-                    alignment: Alignment.centerLeft,
-                  ),
-                ),
-                Positioned.fill(
-                  child: ColoredBox(
-                    color: Colors.white.withValues(alpha: largo ? .05 : .85),
+                  child: Container(
+                    decoration: const BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [corTeal, corVerdePrimario],
+                      ),
+                    ),
                   ),
                 ),
                 SafeArea(

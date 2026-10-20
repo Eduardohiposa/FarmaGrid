@@ -70,6 +70,7 @@ class CartaoCarregamento extends StatelessWidget {
                 color: Color(0xFF386642),
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
+                decoration: TextDecoration.none,
               ),
             ),
           ],
