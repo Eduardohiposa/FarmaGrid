@@ -3,6 +3,7 @@ int _asInt(dynamic value) =>
 double _asDouble(dynamic value) =>
     value is num ? value.toDouble() : double.tryParse('$value') ?? 0;
 
+// organiza os dados de paciente que chegam da api em json
 class PacientePerfil {
   final int id;
   final String nome;

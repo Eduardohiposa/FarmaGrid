@@ -1,7 +1,7 @@
 import 'api_service.dart';
 import 'auth_service.dart';
 
-/// Usa a mesma API do desktop. Credenciais Brevo ficam somente no servidor.
+/// esse servico manda os dados de recuperacao pra api, e as credenciais de email ficam guardadas no servidor
 class RecuperacaoSenhaService {
   static Future<void> _enviar(String acao, Map<String, dynamic> dados) async {
     final resposta = await ApiService.post('/auth/recuperacao/$acao', dados);

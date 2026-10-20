@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'api_service.dart';
 import 'auth_service.dart';
 
+// centraliza o carregamento e a atualizacao dos dados de perfil
 class PerfilService {
   static final ValueNotifier<Map<String, dynamic>?> atual = ValueNotifier(null);
   static int? _loginCarregado;
@@ -28,6 +29,7 @@ class PerfilService {
         : '/api/pacientes/$idEntidade/config';
     final perfil = await ApiService.getMap(caminho);
     if (isMedico) {
+      // busco os dados relacionados juntos pra evitar varias esperas em sequencia
       final listas = await Future.wait([
         ApiService.getList('/api/medicos/$idEntidade/pacientes'),
         ApiService.getList('/api/teleconsultas/medico/$idEntidade'),
@@ -37,6 +39,7 @@ class PerfilService {
       perfil['totalConsultas'] = listas[1].length;
       perfil['totalReceitas'] = listas[2].length;
     } else {
+      
       final listas = await Future.wait([
         ApiService.getList('/api/teleconsultas/paciente/$idEntidade'),
         ApiService.getList('/api/relatorios/paciente/$idEntidade'),
@@ -70,6 +73,7 @@ class PerfilService {
     final caminho = isMedico
         ? '/api/medicos/$idEntidade/foto'
         : '/api/pacientes/$idEntidade/foto';
+    // a api recebe a foto como texto, por isso converto os bytes pra base64
     await ApiService.put(caminho, {'foto': base64Encode(bytes)});
     await carregar(atualizar: true);
   }

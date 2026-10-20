@@ -22,6 +22,7 @@ class ApiException implements Exception {
 }
 
 class AuthService {
+  // esse pacote guarda o token protegido no aparelho pra pessoa nao precisar entrar toda hora
   static const FlutterSecureStorage _storage = FlutterSecureStorage();
 
   static const String _chaveSessao = 'sessao_usuario';
@@ -197,7 +198,7 @@ class AuthService {
       try {
         await _storage.delete(key: _chaveSessao);
       } catch (_) {
-        // O armazenamento pode estar indisponível nesta plataforma.
+        // se essa plataforma nao aceitar o armazenamento seguro, o app continua sem restaurar a sessao
       }
 
       usuarioLogado = null;

@@ -155,6 +155,7 @@ class _TelaConfiguracoesMedicoState extends State<TelaConfiguracoesMedico> {
     }
   }
 
+  // abre a galeria pra escolher uma foto de perfil
   Future<void> _selecionarFoto() async {
     try {
       final arquivo = await ImagePicker().pickImage(
@@ -285,6 +286,7 @@ class _TelaConfiguracoesMedicoState extends State<TelaConfiguracoesMedico> {
         ],
       ),
       child: ScrollConfiguration(
+        // ajuste do efeito da rolagem
         behavior: _SemGlowScroll(),
         child: ListView.builder(
           scrollDirection: Axis.horizontal,
@@ -939,6 +941,7 @@ class _TelaConfiguracoesMedicoState extends State<TelaConfiguracoesMedico> {
   }
 }
 
+// remove o brilho padrao que aparece ao chegar no fim da rolagem
 class _SemGlowScroll extends ScrollBehavior {
   @override
   Widget buildOverscrollIndicator(
